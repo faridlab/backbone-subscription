@@ -1,6 +1,6 @@
 [package]
 name = "backbone-subscription"
-version = "0.1.4"
+version = "0.2.0"
 edition = "2021"
 description = "Recurring/subscription billing: owns subscription plans, recurrence schedules, and cadence-driven generation of Sales Invoices into backbone-billing. The subscription counterpart to billing's spot invoicing."
 
