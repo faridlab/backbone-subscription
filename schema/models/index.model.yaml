@@ -1,0 +1,68 @@
+# =============================================================================
+# subscription Module - Schema Index
+# =============================================================================
+# Version: 2.0
+# Description: Module schema index. `module:` and `schema:` are stamped from the
+# module name by `metaphor module create`. `schema:` gives this module its OWN
+# Postgres schema (migrations emit `CREATE SCHEMA subscription` and qualify tables
+# as `subscription.<table>`) — the convention every backbone module follows
+# (see backbone-sapiens, backbone-bucket). Do not remove it.
+# =============================================================================
+
+module: subscription
+version: 2
+schema: subscription
+description: "Recurring/subscription billing: owns subscription plans, recurrence, and the cadence that generates Sales Invoices into backbone-billing. Subscription owns the plan + recurrence + billing run; the invoice itself lives in billing (zero normal Cargo edges — handoff via a serialized SubscriptionInvoiceDue event + composition ACL)."
+
+config:
+  database: postgresql
+  soft_delete: true
+  audit: true
+  default_timestamps: true
+  generators:
+    disabled:
+      - graphql
+      - grpc
+      - proto
+
+# Reuse sapiens for user identity (actors) — logical refs, no DB constraint.
+external_imports:
+  - module: sapiens
+    types: [User]
+
+# Shared value-object types available to all models in this module.
+shared_types:
+  Timestamps:
+    created_at:
+      type: datetime
+      attributes: ["@default(now)"]
+      description: "Record creation timestamp"
+    updated_at:
+      type: datetime
+      attributes: ["@updated_at"]
+      description: "Last update timestamp"
+    deleted_at:
+      type: datetime?
+      description: "Soft delete timestamp"
+
+  Actors:
+    created_by:
+      type: uuid?
+      attributes: ["@foreign_key(sapiens.User.id)"]
+      description: "User who created this record"
+    updated_by:
+      type: uuid?
+      attributes: ["@foreign_key(sapiens.User.id)"]
+      description: "User who last updated this record"
+    deleted_by:
+      type: uuid?
+      attributes: ["@foreign_key(sapiens.User.id)"]
+      description: "User who deleted this record"
+
+  Metadata: [Timestamps, Actors]
+
+# Import each entity model (parents before children).
+imports:
+  - subscription_plan.model.yaml
+  - subscription.model.yaml
+  - subscription_billing_run.model.yaml

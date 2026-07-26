@@ -1,0 +1,121 @@
+# =============================================================================
+# Domain: Subscription
+# Entity: Subscription
+# Description: A customer's active subscription to a plan — the instance the
+#   cadence bills. Owns the current period + next_billing_date; the cadence
+#   advances these and stages a SubscriptionInvoiceDue per period. The generated
+#   invoice itself lives in backbone-billing (subscription only triggers it).
+# =============================================================================
+
+models:
+  - name: Subscription
+    collection: subscriptions
+    description: "A customer's subscription to a recurring-billing plan"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique subscription id"
+
+      subscription_number:
+        type: string
+        attributes: ["@required", "@max(40)"]
+        description: "Unique business number (e.g. SUB-0001)"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Books owner # logical FK to organization.Company.id"
+
+      customer_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "The subscribing customer # logical FK to party.Party.id"
+
+      plan_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(SubscriptionPlan.id)"]
+        description: "The plan this subscription follows (recurrence + invoice blueprint)"
+
+      branch_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "Optional branch # logical FK to organization.Branch.id"
+
+      status:
+        type: SubscriptionStatus
+        attributes: ["@default(active)"]
+        description: "Subscription lifecycle (only `active` subscriptions are billed by the cadence)"
+
+      started_at:
+        type: date
+        attributes: ["@required"]
+        description: "When the subscription started"
+
+      current_period_start:
+        type: date
+        attributes: ["@required"]
+        description: "Start of the currently-billed period"
+
+      current_period_end:
+        type: date
+        attributes: ["@required"]
+        description: "End of the currently-billed period (inclusive)"
+
+      next_billing_date:
+        type: date
+        attributes: ["@required"]
+        description: "When the next period's invoice is due (the cadence's due-date filter)"
+
+      currency:
+        type: string
+        attributes: ["@default(\"IDR\")", "@max(3)"]
+        description: "ISO-4217 currency (inherited from the plan; IDR only end-to-end for now)"
+
+      cancelled_at:
+        type: date?
+        description: "When the subscription was cancelled (if any)"
+
+      ended_at:
+        type: date?
+        description: "When the subscription ended (cancelled/expired)"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+
+    relations:
+      plan:
+        type: SubscriptionPlan
+        attributes: ["@one", "@foreign_key(plan_id)"]
+        description: "The plan this subscription follows"
+
+    indexes:
+      - type: unique
+        fields: [subscription_number]
+        where: "deleted_at IS NULL"
+      - type: index
+        fields: [company_id, customer_id, status]
+      - type: index
+        fields: [status, next_billing_date]
+        name: idx_subscriptions_due
+
+enums:
+  - name: SubscriptionStatus
+    description: "Subscription lifecycle"
+    variants:
+      - name: trial
+        description: "Free trial period (not yet billed)"
+      - name: active
+        description: "Billable, in good standing"
+        default: true
+      - name: paused
+        description: "Billing paused (service may still be provisioned)"
+      - name: past_due
+        description: "A period's invoice was not settled (dunning is backbone-payment's concern)"
+      - name: cancelled
+        description: "Terminated by user or system"
+      - name: expired
+        description: "Past its end date; no longer active"

@@ -1,0 +1,170 @@
+# =============================================================================
+# Domain: Subscription
+# Entity: SubscriptionPlan (+ SubscriptionPlanLine)
+# Description: The recurring-billing template — a recurrence rule (billing_cycle)
+#   plus the invoice blueprint (lines + receivable account). A Subscription
+#   references a plan; the cadence reads the plan to build each period's invoice.
+#   Subscription owns the plan/recurrence; the invoice itself lives in billing.
+# =============================================================================
+
+models:
+  - name: SubscriptionPlan
+    collection: subscription_plans
+    description: "Recurring-billing template: recurrence rule + invoice blueprint"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique plan id"
+
+      plan_code:
+        type: string
+        attributes: ["@required", "@max(40)"]
+        description: "Unique business code (e.g. PRO-MO-1)"
+
+      name:
+        type: string
+        attributes: ["@required", "@length(max=200)"]
+        description: "Plan name"
+
+      description:
+        type: string?
+        description: "Optional long-form description"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Books owner # logical FK to organization.Company.id"
+
+      billing_cycle:
+        type: BillingCycle
+        attributes: ["@required", "@default(monthly)"]
+        description: "How often a subscription on this plan is billed"
+
+      billing_day:
+        type: int
+        attributes: ["@required", "@default(1)", "@range(1,31)"]
+        description: "Anchor day the period advances on (e.g. day-of-month for monthly)"
+
+      currency:
+        type: string
+        attributes: ["@default(\"IDR\")", "@max(3)"]
+        description: "ISO-4217 currency of the recurring charge (IDR only end-to-end for now)"
+
+      receivable_account_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "A/R control account the generated invoice debits # logical FK to accounting.Account.id"
+
+      price:
+        type: decimal
+        attributes: ["@required", "@precision(18,2)", "@non_negative"]
+        description: "Recurring charge (informational; the billed lines come from the blueprint)"
+
+      trial_days:
+        type: int?
+        attributes: ["@non_negative"]
+        description: "Optional free-trial length in days before the first bill"
+
+      status:
+        type: SubscriptionPlanStatus
+        attributes: ["@default(active)"]
+        description: "Plan lifecycle (active plans can be subscribed to)"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+
+    relations:
+      lines:
+        type: "SubscriptionPlanLine[]"
+        attributes: ["@one_to_many"]
+        inverse: plan
+
+    indexes:
+      - type: unique
+        fields: [plan_code]
+        where: "deleted_at IS NULL"
+      - type: index
+        fields: [company_id, status]
+
+  - name: SubscriptionPlanLine
+    collection: subscription_plan_lines
+    description: "One line of the plan's invoice blueprint (the template for each generated invoice line)"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique line id"
+
+      plan_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(SubscriptionPlan.id)"]
+        description: "The plan this blueprint line belongs to"
+
+      item_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "What is being charged # logical FK to catalog.Item.id"
+
+      account_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Revenue account this line credits # logical FK to accounting.Account.id"
+
+      description:
+        type: string?
+        description: "Optional line description"
+
+      quantity:
+        type: decimal
+        attributes: ["@required", "@precision(18,4)", "@non_negative"]
+        description: "Billed quantity per period (default 1)"
+
+      unit_price:
+        type: decimal
+        attributes: ["@required", "@precision(18,2)", "@non_negative"]
+        description: "Per-unit price"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+
+    relations:
+      plan:
+        type: SubscriptionPlan
+        attributes: ["@one", "@foreign_key(plan_id)"]
+        inverse: lines
+
+    indexes:
+      - type: index
+        fields: [plan_id]
+
+enums:
+  - name: BillingCycle
+    description: "Recurrence period for a subscription plan"
+    variants:
+      - name: daily
+        description: "Billed every day"
+      - name: weekly
+        description: "Billed every week"
+      - name: monthly
+        description: "Billed every month"
+        default: true
+      - name: quarterly
+        description: "Billed every quarter"
+      - name: yearly
+        description: "Billed every year"
+
+  - name: SubscriptionPlanStatus
+    description: "Plan lifecycle"
+    variants:
+      - name: active
+        description: "Can be subscribed to"
+        default: true
+      - name: archived
+        description: "Retired; no new subscriptions"

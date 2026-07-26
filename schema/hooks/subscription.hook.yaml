@@ -1,0 +1,63 @@
+# =============================================================================
+# subscription Hooks — lifecycle state machines
+# =============================================================================
+# Declarative spec of the behavior implemented in the hand-authored
+# subscription_write_service. The state-machine generator emits transition
+# guards from these.
+
+module: subscription
+version: 2
+
+# -----------------------------------------------------------------------------
+# State machines - one per entity that has a status lifecycle.
+# -----------------------------------------------------------------------------
+state_machines:
+  - entity: SubscriptionPlan
+    field: status
+    initial: active
+    states: [active, archived]
+    transitions:
+      - { from: active, to: archived, on: archive }
+
+  - entity: Subscription
+    field: status
+    initial: active
+    states: [trial, active, paused, past_due, cancelled, expired]
+    transitions:
+      - { from: trial,     to: active,    on: activate }
+      - { from: active,    to: paused,    on: pause }
+      - { from: paused,    to: active,    on: resume }
+      - { from: active,    to: past_due,  on: mark_past_due }
+      - { from: past_due,  to: active,    on: reactivate }
+      - { from: active,    to: cancelled, on: cancel }
+      - { from: paused,    to: cancelled, on: cancel }
+      - { from: past_due,  to: cancelled, on: cancel }
+      - { from: active,    to: expired,   on: expire }
+      - { from: cancelled, to: expired,   on: expire }
+
+  - entity: SubscriptionBillingRun
+    field: status
+    initial: pending
+    states: [pending, invoiced, failed]
+    transitions:
+      - { from: pending, to: invoiced, on: invoice }
+      - { from: pending, to: failed,   on: fail }
+      - { from: failed,  to: pending,  on: retry }
+
+# -----------------------------------------------------------------------------
+# Write-path rules - validated before any write.
+# -----------------------------------------------------------------------------
+rules:
+  - id: R1
+    name: period_dates_ordered
+    when: writing
+    assert: "current_period_start <= current_period_end and next_billing_date >= current_period_end"
+    error_code: invalid_period_dates
+
+# -----------------------------------------------------------------------------
+# Domain events (emission is the service's responsibility; staged into the outbox).
+# -----------------------------------------------------------------------------
+events:
+  SubscriptionInvoiceDue:
+    when: "the cadence advances a period and stages an invoice for billing"
+    payload: [subscription_id, company_id, customer_id, plan_id, period_start, period_end, grand_total]

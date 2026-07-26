@@ -1,0 +1,102 @@
+# =============================================================================
+# Domain: Subscription
+# Entity: SubscriptionBillingRun
+# Description: One billing cycle for a subscription — the cadence creates a
+#   `pending` run per period (atomically with advancing the subscription's
+#   period + staging SubscriptionInvoiceDue). The composition relay creates the
+#   real invoice in billing and writes its id back here (`status -> invoiced`).
+#   Unique on (subscription_id, period_start) so a re-tick of the same period is
+#   a no-op (idempotent).
+# =============================================================================
+
+models:
+  - name: SubscriptionBillingRun
+    collection: subscription_billing_runs
+    description: "One billed period of a subscription (the cadence's unit of work)"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique billing-run id"
+
+      subscription_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Subscription.id)"]
+        description: "The subscription this run bills"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Books owner # logical FK to organization.Company.id"
+
+      period_start:
+        type: date
+        attributes: ["@required"]
+        description: "Start of the period this run covers"
+
+      period_end:
+        type: date
+        attributes: ["@required"]
+        description: "End of the period this run covers (inclusive)"
+
+      due_date:
+        type: date
+        attributes: ["@required"]
+        description: "The invoice posting/due date for this period"
+
+      grand_total:
+        type: decimal
+        attributes: ["@required", "@precision(18,2)", "@non_negative"]
+        description: "The amount the generated invoice must total (carried on the seam event, ADR-002 §2)"
+
+      status:
+        type: BillingRunStatus
+        attributes: ["@default(pending)"]
+        description: "pending = staged, not yet invoiced; invoiced = billing created the invoice; failed = relay error"
+
+      invoice_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "The real billing.SalesInvoice id once the relay creates it # logical FK"
+
+      idempotency_key:
+        type: string
+        attributes: ["@required", "@max(120)"]
+        description: "Deterministic key \"{subscription_id}:{period_start}\" — drives the consumer-side inbox dedup"
+
+      attempted_at:
+        type: datetime?
+        description: "When the relay last attempted this run"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+
+    relations:
+      subscription:
+        type: Subscription
+        attributes: ["@one", "@foreign_key(subscription_id)"]
+        description: "The subscription this run belongs to"
+
+    indexes:
+      - type: unique
+        fields: [subscription_id, period_start]
+        where: "deleted_at IS NULL"
+      - type: unique
+        fields: [idempotency_key]
+      - type: index
+        fields: [company_id, status]
+
+enums:
+  - name: BillingRunStatus
+    description: "State of a subscription billing run"
+    variants:
+      - name: pending
+        description: "Staged in the outbox; invoice not yet created"
+        default: true
+      - name: invoiced
+        description: "The composition relay created + posted the real invoice in billing"
+      - name: failed
+        description: "The relay could not create the invoice (retryable)"
