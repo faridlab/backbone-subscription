@@ -17,6 +17,12 @@ user_owned:
   - "src/application/service/subscription_events.rs"
   - "src/application/service/subscription_write_service.rs"
 
+  # User-owned repositories holding the cadence's hand-written SQL (advance_period,
+  # insert_pending_run, find_due_plans, find_blueprint_by_plan). Same pattern as backbone-pos/banking.
+  - "src/infrastructure/persistence/subscription_repository.rs"
+  - "src/infrastructure/persistence/subscription_billing_run_repository.rs"
+  - "src/infrastructure/persistence/subscription_plan_line_repository.rs"
+
   # Behavior tests (the golden cases / oracle) + BDD features.
   - "tests/features/**"
   - "tests/subscription_seam.rs"

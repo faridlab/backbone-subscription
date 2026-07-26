@@ -8,16 +8,23 @@
 //! the outbox → billing.create_sales_invoice + post_sales_invoice → writes the invoice_id back onto
 //! the billing run.
 //!
-//! NOTE (v1): the cadence's read/advance SQL lives here rather than in a `_recurrence_repository.rs`.
-//! It is parameterized and read-heavy; extract it to a repository if it grows beyond this engine.
-//! Uses runtime-checked sqlx (string queries), like backbone-billing's repositories.
+//! NOTE: the cadence's read/advance SQL lives in the subscription repositories
+//! (`SubscriptionRepository::find_due_plans`/`advance_period`, `SubscriptionBillingRunRepository`,
+//! `SubscriptionPlanLineRepository`) per the module's 4-layer rule — this service orchestrates only.
+//! `find_due_plans` is a cross-company sweep: under RLS the composing service MUST drive `process_due`
+//! from a system/cross-company role, or the fence returns 0 rows and nobody is billed.
 
 use backbone_orm::company_scope;
 use chrono::{Months, NaiveDate};
 use rust_decimal::Decimal;
-use sqlx::{FromRow, PgPool, Row};
+use sqlx::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
+
+use crate::infrastructure::persistence::{
+    NewBillingRunRow, SubscriptionBillingRunRepository, SubscriptionPlanLineRepository,
+    SubscriptionRepository,
+};
 
 use super::subscription_events::{
     DueLine, LoggingSink, SubscriptionEvent, SubscriptionEventSink, SubscriptionInvoiceDue,
@@ -90,15 +97,14 @@ impl SubscriptionWriteService {
         let mut tx = self.db_pool.begin().await?;
         company_scope::bind_company_on(&mut tx, d.company_id).await?;
 
+        let subscriptions = SubscriptionRepository::new(self.db_pool.clone());
+        let billing_runs = SubscriptionBillingRunRepository::new(self.db_pool.clone());
+
         // Gate 1: the period advance. WHERE next_billing_date = $old so a concurrent tick that
         // already advanced this subscription misses (rows_affected == 0) → idempotent.
-        let advanced: u64 = sqlx::query(
-            r#"UPDATE subscription.subscriptions
-                 SET current_period_start = $2, current_period_end = $3, next_billing_date = $4
-               WHERE id = $1 AND next_billing_date = $5 AND (metadata->>'deleted_at') IS NULL"#,
-        )
-        .bind(d.id).bind(period_start).bind(period_end).bind(new_next).bind(d.next_billing_date)
-        .execute(&mut *tx).await?.rows_affected();
+        let advanced = subscriptions
+            .advance_period(&mut *tx, d.id, period_start, period_end, new_next, d.next_billing_date)
+            .await?;
         if advanced == 0 {
             tx.rollback().await?;
             return Ok(false);
@@ -106,21 +112,20 @@ impl SubscriptionWriteService {
 
         // Gate 2: exactly one billing run per (subscription, period). ON CONFLICT DO NOTHING +
         // RETURNING — if a run already exists (re-tick), no new run, no event.
-        let run_row = sqlx::query(
-            r#"INSERT INTO subscription.subscription_billing_runs
-                 (id, subscription_id, company_id, period_start, period_end, due_date,
-                  grand_total, status, idempotency_key)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending'::billing_run_status, $8)
-               ON CONFLICT (subscription_id, period_start) WHERE (metadata->>'deleted_at') IS NULL
-               DO NOTHING RETURNING id"#,
-        )
-        .bind(Uuid::new_v4()).bind(d.id).bind(d.company_id)
-        .bind(period_start).bind(period_end).bind(period_start)
-        .bind(d.grand_total).bind(format!("{}:{}", d.id, period_start))
-        .fetch_optional(&mut *tx).await?;
+        let run_id = billing_runs
+            .insert_pending_run_on_conflict_nothing(&mut *tx, &NewBillingRunRow {
+                id: Uuid::new_v4(),
+                subscription_id: d.id,
+                company_id: d.company_id,
+                period_start,
+                period_end,
+                due_date: period_start,
+                grand_total: d.grand_total,
+                idempotency_key: format!("{}:{}", d.id, period_start),
+            })
+            .await?;
 
-        if let Some(row) = run_row {
-            let _run_id: Uuid = row.get("id");
+        if run_id.is_some() {
             // Winner: stage the seam event in the same tx (the fence).
             if let Some(schema) = self.outbox_schema.as_deref() {
                 let event = self.due_event(d, period_start, period_end);
@@ -174,38 +179,14 @@ impl SubscriptionWriteService {
     /// Read every active, due subscription joined with its plan + plan lines (the engine's unit of
     /// work). v1: plan lines fetched per-row — acceptable for a bounded cadence batch.
     async fn fetch_due(&self, today: NaiveDate) -> Result<Vec<DueSubscription>, SubscriptionError> {
-        #[derive(FromRow)]
-        struct PlanRow {
-            id: Uuid, company_id: Uuid, customer_id: Uuid, branch_id: Option<Uuid>, plan_id: Uuid,
-            next_billing_date: NaiveDate, currency: String, billing_cycle: String,
-            receivable_account_id: Uuid,
-        }
-        let plans: Vec<PlanRow> = sqlx::query_as(
-            r#"SELECT s.id, s.company_id, s.customer_id, s.branch_id, s.plan_id,
-                      s.next_billing_date, s.currency,
-                      p.billing_cycle::text AS billing_cycle, p.receivable_account_id
-               FROM subscription.subscriptions s
-               JOIN subscription.subscription_plans p ON s.plan_id = p.id
-               WHERE s.status = 'active' AND s.next_billing_date <= $1
-                 AND (s.metadata->>'deleted_at') IS NULL"#,
-        )
-        .bind(today)
-        .fetch_all(&self.db_pool).await?;
+        let subscriptions = SubscriptionRepository::new(self.db_pool.clone());
+        let plan_lines = SubscriptionPlanLineRepository::new(self.db_pool.clone());
+
+        let plans = subscriptions.find_due_plans(&self.db_pool, today).await?;
 
         let mut out = Vec::with_capacity(plans.len());
         for p in plans {
-            #[derive(FromRow)]
-            struct LineRow {
-                item_id: Uuid, account_id: Uuid, description: Option<String>,
-                quantity: Decimal, unit_price: Decimal,
-            }
-            let line_rows: Vec<LineRow> = sqlx::query_as(
-                r#"SELECT item_id, account_id, description, quantity, unit_price
-                   FROM subscription.subscription_plan_lines
-                   WHERE plan_id = $1 AND (metadata->>'deleted_at') IS NULL"#,
-            )
-            .bind(p.plan_id)
-            .fetch_all(&self.db_pool).await?;
+            let line_rows = plan_lines.find_blueprint_by_plan(&self.db_pool, p.plan_id).await?;
             let lines: Vec<DueLine> = line_rows.into_iter()
                 .map(|l| DueLine { item_id: l.item_id, account_id: l.account_id, description: l.description,
                                    quantity: l.quantity, unit_price: l.unit_price })

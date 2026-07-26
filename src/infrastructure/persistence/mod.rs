@@ -28,4 +28,7 @@ pub use backbone_orm::repository::{
 
 // Re-export custom persistence types
 // <<< CUSTOM
+pub use subscription_billing_run_repository::NewBillingRunRow;
+pub use subscription_repository::DuePlanRow;
+pub use subscription_plan_line_repository::PlanLineRow;
 // END CUSTOM
