@@ -14,6 +14,11 @@ version: 2
 schema: subscription
 description: "Recurring/subscription billing: owns subscription plans, recurrence, and the cadence that generates Sales Invoices into backbone-billing. Subscription owns the plan + recurrence + billing run; the invoice itself lives in billing (zero normal Cargo edges — handoff via a serialized SubscriptionInvoiceDue event + composition ACL)."
 
+# ADR-0014 company fence: subscriptions, plans, and billing runs are company-scoped
+# and fenced strict. subscription_plan_lines is parent-scoped (no direct company_id;
+# reaches the fence through subscription_plans) — implicitly excluded.
+company_fence: strict
+
 config:
   database: postgresql
   soft_delete: true
