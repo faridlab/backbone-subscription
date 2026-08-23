@@ -130,7 +130,7 @@ impl SubscriptionWriteService {
             if let Some(schema) = self.outbox_schema.as_deref() {
                 let event = self.due_event(d, period_start, period_end);
                 self.stage_outbox_event(&mut *tx, schema, "SubscriptionInvoiceDue",
-                    "Subscription", d.id, &event).await?;
+                    "Subscription", d.id, d.company_id, &event).await?;
             }
             tx.commit().await?;
             // In-proc sink fires after commit (best-effort; the durable path is the outbox).
@@ -163,12 +163,15 @@ impl SubscriptionWriteService {
         event_type: &str,
         aggregate_type: &str,
         aggregate_id: Uuid,
+        company_id: Uuid,
         event: &E,
     ) -> Result<(), SubscriptionError> {
         let payload = serde_json::to_value(event)
             .map_err(|e| SubscriptionError::Db(sqlx::Error::Protocol(format!("outbox serialize: {e}"))))?;
+        // OutboxRecord::new requires the owning tenant (ADR-0011 — the outbox_events table is fenced
+        // by company_id). The caller passes the event's company explicitly.
         let rec = backbone_outbox::OutboxRecord::new(
-            event_type, aggregate_type, aggregate_id.to_string(), payload, chrono::Utc::now(),
+            event_type, aggregate_type, aggregate_id.to_string(), company_id, payload, chrono::Utc::now(),
         );
         backbone_outbox::outbox::stage(&mut *conn, schema, &rec)
             .await
