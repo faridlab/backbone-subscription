@@ -23,11 +23,6 @@ models:
         attributes: ["@required", "@max(40)"]
         description: "Unique business number (e.g. SUB-0001)"
 
-      company_id:
-        type: uuid
-        attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Books owner # logical FK to organization.Company.id"
-
       customer_id:
         type: uuid
         attributes: ["@required", "@exclude_from_foreign_key_check"]
@@ -93,11 +88,13 @@ models:
         description: "The plan this subscription follows"
 
     indexes:
+      # No tenancy indexes (ADR-0029): the module is tenant-agnostic. The org_unit_id-
+      # leading customer/status listing index is installed by the composing service's
+      # tenancy decorator, not declared here. The subscription-number unique and the
+      # cadence due-date filter are domain constraints/read paths and stay.
       - type: unique
         fields: [subscription_number]
         where: "deleted_at IS NULL"
-      - type: index
-        fields: [company_id, customer_id, status]
       - type: index
         fields: [status, next_billing_date]
         name: idx_subscriptions_due

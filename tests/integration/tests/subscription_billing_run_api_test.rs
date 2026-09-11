@@ -25,7 +25,6 @@ impl TestDataGenerator for SubscriptionBillingRunTestData {
         json!({
             "id": Uuid::new_v4().to_string(),
             "subscription_id": Uuid::new_v4().to_string(),
-            "company_id": Uuid::new_v4().to_string(),
             "period_start": Utc::now().format("%Y-%m-%d").to_string(),
             "period_end": Utc::now().format("%Y-%m-%d").to_string(),
             "due_date": Utc::now().format("%Y-%m-%d").to_string(),
@@ -43,7 +42,6 @@ impl TestDataGenerator for SubscriptionBillingRunTestData {
         json!({
             "id": id,
             "subscription_id": Uuid::new_v4().to_string(),
-            "company_id": Uuid::new_v4().to_string(),
             "period_start": Utc::now().format("%Y-%m-%d").to_string(),
             "period_end": Utc::now().format("%Y-%m-%d").to_string(),
             "due_date": Utc::now().format("%Y-%m-%d").to_string(),

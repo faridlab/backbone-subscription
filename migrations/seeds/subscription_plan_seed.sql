@@ -9,7 +9,6 @@
 --     plan_code,
 --     name,
 --     description,
---     company_id,
 --     billing_cycle,
 --     billing_day,
 --     currency,

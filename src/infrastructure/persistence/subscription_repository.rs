@@ -41,7 +41,6 @@ impl SubscriptionRepository {
 #[derive(FromRow)]
 pub struct DuePlanRow {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub customer_id: Uuid,
     pub branch_id: Option<Uuid>,
     pub plan_id: Uuid,
@@ -55,19 +54,19 @@ pub struct DuePlanRow {
 impl SubscriptionRepository {
     /// Every active subscription whose `next_billing_date` has arrived, joined to its plan.
     ///
-    /// This is the cadence sweep — it intentionally spans ALL companies (the cron bills every
-    /// tenant's due subscriptions in one tick), so it reads via the bare pool the caller supplies and
-    /// is NOT company-scoped. Under RLS (ADR-0008) the composing service MUST drive `process_due`
-    /// from a system / cross-company role, otherwise the fence returns 0 rows and nobody is billed.
-    /// The bare read is the historical behaviour, preserved on purpose; the role decision is the
-    /// composition layer's, not this module's.
+    /// This is the cadence sweep — it intentionally spans EVERY org unit (the cron bills all due
+    /// subscriptions in one tick), so it reads via the bare pool the caller supplies and is not
+    /// scoped here. The module is tenant-agnostic (ADR-0029): the composing service's tenancy
+    /// decorator scopes the read, and the composition layer must drive `process_due` from a
+    /// context the decorator does not fence (jobs lane), otherwise the scoped read returns 0 rows
+    /// and nobody is billed.
     pub async fn find_due_plans(
         &self,
         pool: &PgPool,
         today: NaiveDate,
     ) -> Result<Vec<DuePlanRow>, sqlx::Error> {
         sqlx::query_as::<_, DuePlanRow>(
-            r#"SELECT s.id, s.company_id, s.customer_id, s.branch_id, s.plan_id,
+            r#"SELECT s.id, s.customer_id, s.branch_id, s.plan_id,
                       s.next_billing_date, s.currency,
                       p.billing_cycle::text AS billing_cycle, p.receivable_account_id
                FROM subscription.subscriptions s
@@ -83,8 +82,8 @@ impl SubscriptionRepository {
     ///
     /// `WHERE next_billing_date = expected_next` so a concurrent tick that already advanced it
     /// misses (rows_affected == 0 ⇒ idempotent no-op). Takes the CALLER'S connection so the advance,
-    /// the billing-run insert, and the outbox event commit as one unit; the caller has already bound
-    /// the company on `conn` — don't re-bind here.
+    /// the billing-run insert, and the outbox event commit as one unit; the caller has already
+    /// relayed the ambient org scope onto `conn` — don't re-bind here.
     pub async fn advance_period(
         &self,
         conn: &mut PgConnection,

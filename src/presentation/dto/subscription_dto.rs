@@ -38,9 +38,6 @@ pub struct CreateSubscriptionDto {
     #[serde(alias = "subscription_number")]
     pub subscription_number: String,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "customer_id")]
     pub customer_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
@@ -87,9 +84,6 @@ pub struct UpdateSubscriptionDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "subscription_number")]
     pub subscription_number: String,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "customer_id")]
     pub customer_id: Uuid,
@@ -138,9 +132,6 @@ pub struct PatchSubscriptionDto {
     #[serde(skip_serializing_if = "Option::is_none", alias = "subscription_number")]
     pub subscription_number: Option<String>,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "customer_id")]
     pub customer_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
@@ -175,7 +166,7 @@ pub struct PatchSubscriptionDto {
 impl PatchSubscriptionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.subscription_number.is_some() || self.company_id.is_some() || self.customer_id.is_some() || self.plan_id.is_some() || self.branch_id.is_some() || self.status.is_some() || self.started_at.is_some() || self.current_period_start.is_some() || self.current_period_end.is_some() || self.next_billing_date.is_some() || self.currency.is_some() || self.cancelled_at.is_some() || self.ended_at.is_some()
+        self.subscription_number.is_some() || self.customer_id.is_some() || self.plan_id.is_some() || self.branch_id.is_some() || self.status.is_some() || self.started_at.is_some() || self.current_period_start.is_some() || self.current_period_end.is_some() || self.next_billing_date.is_some() || self.currency.is_some() || self.cancelled_at.is_some() || self.ended_at.is_some()
     }
 }
 
@@ -195,8 +186,6 @@ pub struct SubscriptionResponseDto {
     pub id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub subscription_number: String,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub customer_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
@@ -273,8 +262,8 @@ impl SubscriptionListResponseDto {
 pub struct SubscriptionSummaryDto {
     pub id: Uuid,
     pub subscription_number: String,
-    pub company_id: Uuid,
     pub customer_id: Uuid,
+    pub plan_id: Uuid,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -287,7 +276,6 @@ impl From<Subscription> for SubscriptionResponseDto {
         Self {
             id: entity.id,
             subscription_number: entity.subscription_number,
-            company_id: entity.company_id,
             customer_id: entity.customer_id,
             plan_id: entity.plan_id,
             branch_id: entity.branch_id,
@@ -310,8 +298,8 @@ impl From<Subscription> for SubscriptionSummaryDto {
         Self {
             id: entity.id,
             subscription_number: entity.subscription_number,
-            company_id: entity.company_id,
             customer_id: entity.customer_id,
+            plan_id: entity.plan_id,
             created_at,
         }
     }
@@ -322,7 +310,6 @@ impl From<CreateSubscriptionDto> for Subscription {
         Self {
             id: Uuid::new_v4(),
             subscription_number: dto.subscription_number,
-            company_id: dto.company_id,
             customer_id: dto.customer_id,
             plan_id: dto.plan_id,
             branch_id: dto.branch_id,
@@ -344,7 +331,6 @@ impl From<&Subscription> for SubscriptionResponseDto {
         Self {
             id: entity.id.clone(),
             subscription_number: entity.subscription_number.clone(),
-            company_id: entity.company_id.clone(),
             customer_id: entity.customer_id.clone(),
             plan_id: entity.plan_id.clone(),
             branch_id: entity.branch_id.clone(),
@@ -370,7 +356,6 @@ impl backbone_core::FromCreateDto<CreateSubscriptionDto> for Subscription {
 impl backbone_core::ApplyUpdateDto<UpdateSubscriptionDto> for Subscription {
     fn apply_update(mut self, dto: UpdateSubscriptionDto) -> backbone_core::ServiceResult<Self> {
         self.subscription_number = dto.subscription_number;
-        self.company_id = dto.company_id;
         self.customer_id = dto.customer_id;
         self.plan_id = dto.plan_id;
         self.branch_id = dto.branch_id;
@@ -394,4 +379,3 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionDto> for Subscription {
 // Add custom DTOs specific to Subscription here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
-

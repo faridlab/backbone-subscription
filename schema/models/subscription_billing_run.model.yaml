@@ -25,11 +25,6 @@ models:
         attributes: ["@required", "@foreign_key(Subscription.id)"]
         description: "The subscription this run bills"
 
-      company_id:
-        type: uuid
-        attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Books owner # logical FK to organization.Company.id"
-
       period_start:
         type: date
         attributes: ["@required"]
@@ -81,13 +76,15 @@ models:
         description: "The subscription this run belongs to"
 
     indexes:
+      # No tenancy indexes (ADR-0029): the module is tenant-agnostic. The org_unit_id-
+      # leading run-status listing index is installed by the composing service's tenancy
+      # decorator, not declared here. The per-subscription period unique and the
+      # idempotency-key unique are domain constraints and stay.
       - type: unique
         fields: [subscription_id, period_start]
         where: "deleted_at IS NULL"
       - type: unique
         fields: [idempotency_key]
-      - type: index
-        fields: [company_id, status]
 
 enums:
   - name: BillingRunStatus

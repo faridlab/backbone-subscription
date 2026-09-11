@@ -55,7 +55,6 @@ pub struct SubscriptionPlan {
     pub plan_code: String,
     pub name: String,
     pub description: Option<String>,
-    pub company_id: Uuid,
     pub billing_cycle: BillingCycle,
     pub billing_day: i32,
     pub currency: String,
@@ -71,17 +70,16 @@ pub struct SubscriptionPlan {
 impl SubscriptionPlan {
     /// Create a builder for SubscriptionPlan
     pub fn builder() -> SubscriptionPlanBuilder {
-        SubscriptionPlanBuilder::default()
+        <SubscriptionPlanBuilder as Default>::default()
     }
 
     /// Create a new SubscriptionPlan with required fields
-    pub fn new(plan_code: String, name: String, company_id: Uuid, billing_cycle: BillingCycle, billing_day: i32, currency: String, receivable_account_id: Uuid, price: Decimal, status: SubscriptionPlanStatus) -> Self {
+    pub fn new(plan_code: String, name: String, billing_cycle: BillingCycle, billing_day: i32, currency: String, receivable_account_id: Uuid, price: Decimal, status: SubscriptionPlanStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             plan_code,
             name,
             description: None,
-            company_id,
             billing_cycle,
             billing_day,
             currency,
@@ -182,9 +180,6 @@ impl SubscriptionPlan {
                 "description" => {
                     if let Ok(v) = serde_json::from_value(value) { self.description = v; }
                 }
-                "company_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.company_id = v; }
-                }
                 "billing_cycle" => {
                     if let Ok(v) = serde_json::from_value(value) { self.billing_cycle = v; }
                 }
@@ -260,7 +255,6 @@ impl backbone_orm::EntityRepoMeta for SubscriptionPlan {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("company_id".to_string(), "uuid".to_string());
         m.insert("receivable_account_id".to_string(), "uuid".to_string());
         m.insert("billing_cycle".to_string(), "billing_cycle".to_string());
         m.insert("status".to_string(), "subscription_plan_status".to_string());
@@ -268,9 +262,6 @@ impl backbone_orm::EntityRepoMeta for SubscriptionPlan {
     }
     fn search_fields() -> &'static [&'static str] {
         &["plan_code", "name", "currency"]
-    }
-    fn company_field() -> Option<&'static str> {
-        Some("company_id")
     }
 }
 
@@ -283,7 +274,6 @@ pub struct SubscriptionPlanBuilder {
     plan_code: Option<String>,
     name: Option<String>,
     description: Option<String>,
-    company_id: Option<Uuid>,
     billing_cycle: Option<BillingCycle>,
     billing_day: Option<i32>,
     currency: Option<String>,
@@ -309,12 +299,6 @@ impl SubscriptionPlanBuilder {
     /// Set the description field (optional)
     pub fn description(mut self, value: String) -> Self {
         self.description = Some(value);
-        self
-    }
-
-    /// Set the company_id field (required)
-    pub fn company_id(mut self, value: Uuid) -> Self {
-        self.company_id = Some(value);
         self
     }
 
@@ -366,7 +350,6 @@ impl SubscriptionPlanBuilder {
     pub fn build(self) -> Result<SubscriptionPlan, String> {
         let plan_code = self.plan_code.ok_or_else(|| "plan_code is required".to_string())?;
         let name = self.name.ok_or_else(|| "name is required".to_string())?;
-        let company_id = self.company_id.ok_or_else(|| "company_id is required".to_string())?;
         let receivable_account_id = self.receivable_account_id.ok_or_else(|| "receivable_account_id is required".to_string())?;
         let price = self.price.ok_or_else(|| "price is required".to_string())?;
 
@@ -375,14 +358,13 @@ impl SubscriptionPlanBuilder {
             plan_code,
             name,
             description: self.description,
-            company_id,
-            billing_cycle: self.billing_cycle.unwrap_or(BillingCycle::default()),
+            billing_cycle: self.billing_cycle.unwrap_or_default(),
             billing_day: self.billing_day.unwrap_or(1),
             currency: self.currency.unwrap_or("IDR".to_string()),
             receivable_account_id,
             price,
             trial_days: self.trial_days,
-            status: self.status.unwrap_or(SubscriptionPlanStatus::default()),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

@@ -52,7 +52,6 @@ impl std::ops::Deref for SubscriptionBillingRunId {
 pub struct SubscriptionBillingRun {
     pub id: Uuid,
     pub subscription_id: Uuid,
-    pub company_id: Uuid,
     pub period_start: NaiveDate,
     pub period_end: NaiveDate,
     pub due_date: NaiveDate,
@@ -69,15 +68,14 @@ pub struct SubscriptionBillingRun {
 impl SubscriptionBillingRun {
     /// Create a builder for SubscriptionBillingRun
     pub fn builder() -> SubscriptionBillingRunBuilder {
-        SubscriptionBillingRunBuilder::default()
+        <SubscriptionBillingRunBuilder as Default>::default()
     }
 
     /// Create a new SubscriptionBillingRun with required fields
-    pub fn new(subscription_id: Uuid, company_id: Uuid, period_start: NaiveDate, period_end: NaiveDate, due_date: NaiveDate, grand_total: Decimal, status: BillingRunStatus, idempotency_key: String) -> Self {
+    pub fn new(subscription_id: Uuid, period_start: NaiveDate, period_end: NaiveDate, due_date: NaiveDate, grand_total: Decimal, status: BillingRunStatus, idempotency_key: String) -> Self {
         Self {
             id: Uuid::new_v4(),
             subscription_id,
-            company_id,
             period_start,
             period_end,
             due_date,
@@ -173,9 +171,6 @@ impl SubscriptionBillingRun {
                 "subscription_id" => {
                     if let Ok(v) = serde_json::from_value(value) { self.subscription_id = v; }
                 }
-                "company_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.company_id = v; }
-                }
                 "period_start" => {
                     if let Ok(v) = serde_json::from_value(value) { self.period_start = v; }
                 }
@@ -255,16 +250,12 @@ impl backbone_orm::EntityRepoMeta for SubscriptionBillingRun {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("subscription_id".to_string(), "uuid".to_string());
-        m.insert("company_id".to_string(), "uuid".to_string());
         m.insert("invoice_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "billing_run_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
         &["idempotency_key"]
-    }
-    fn company_field() -> Option<&'static str> {
-        Some("company_id")
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("subscription", "subscriptions", "subscriptionId")]
@@ -278,7 +269,6 @@ impl backbone_orm::EntityRepoMeta for SubscriptionBillingRun {
 #[derive(Debug, Clone, Default)]
 pub struct SubscriptionBillingRunBuilder {
     subscription_id: Option<Uuid>,
-    company_id: Option<Uuid>,
     period_start: Option<NaiveDate>,
     period_end: Option<NaiveDate>,
     due_date: Option<NaiveDate>,
@@ -293,12 +283,6 @@ impl SubscriptionBillingRunBuilder {
     /// Set the subscription_id field (required)
     pub fn subscription_id(mut self, value: Uuid) -> Self {
         self.subscription_id = Some(value);
-        self
-    }
-
-    /// Set the company_id field (required)
-    pub fn company_id(mut self, value: Uuid) -> Self {
-        self.company_id = Some(value);
         self
     }
 
@@ -355,7 +339,6 @@ impl SubscriptionBillingRunBuilder {
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<SubscriptionBillingRun, String> {
         let subscription_id = self.subscription_id.ok_or_else(|| "subscription_id is required".to_string())?;
-        let company_id = self.company_id.ok_or_else(|| "company_id is required".to_string())?;
         let period_start = self.period_start.ok_or_else(|| "period_start is required".to_string())?;
         let period_end = self.period_end.ok_or_else(|| "period_end is required".to_string())?;
         let due_date = self.due_date.ok_or_else(|| "due_date is required".to_string())?;
@@ -365,12 +348,11 @@ impl SubscriptionBillingRunBuilder {
         Ok(SubscriptionBillingRun {
             id: Uuid::new_v4(),
             subscription_id,
-            company_id,
             period_start,
             period_end,
             due_date,
             grand_total,
-            status: self.status.unwrap_or(BillingRunStatus::default()),
+            status: self.status.unwrap_or_default(),
             invoice_id: self.invoice_id,
             idempotency_key,
             attempted_at: self.attempted_at,

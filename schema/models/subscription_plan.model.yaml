@@ -32,11 +32,6 @@ models:
         type: string?
         description: "Optional long-form description"
 
-      company_id:
-        type: uuid
-        attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Books owner # logical FK to organization.Company.id"
-
       billing_cycle:
         type: BillingCycle
         attributes: ["@required", "@default(monthly)"]
@@ -84,11 +79,12 @@ models:
         inverse: plan
 
     indexes:
+      # No tenancy indexes (ADR-0029): the module is tenant-agnostic. The org_unit_id-
+      # leading plan-status listing index is installed by the composing service's tenancy
+      # decorator, not declared here. The plan-code unique is a domain constraint and stays.
       - type: unique
         fields: [plan_code]
         where: "deleted_at IS NULL"
-      - type: index
-        fields: [company_id, status]
 
   - name: SubscriptionPlanLine
     collection: subscription_plan_lines

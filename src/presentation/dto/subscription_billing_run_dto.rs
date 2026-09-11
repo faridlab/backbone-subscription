@@ -37,9 +37,6 @@ pub struct CreateSubscriptionBillingRunDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "subscription_id")]
     pub subscription_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01"))]
     #[serde(alias = "period_start")]
     pub period_start: NaiveDate,
@@ -78,9 +75,6 @@ pub struct UpdateSubscriptionBillingRunDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "subscription_id")]
     pub subscription_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01"))]
     #[serde(alias = "period_start")]
     pub period_start: NaiveDate,
@@ -119,9 +113,6 @@ pub struct PatchSubscriptionBillingRunDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "subscription_id")]
     pub subscription_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "period_start")]
     pub period_start: Option<NaiveDate>,
@@ -148,7 +139,7 @@ pub struct PatchSubscriptionBillingRunDto {
 impl PatchSubscriptionBillingRunDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.subscription_id.is_some() || self.company_id.is_some() || self.period_start.is_some() || self.period_end.is_some() || self.due_date.is_some() || self.grand_total.is_some() || self.status.is_some() || self.invoice_id.is_some() || self.idempotency_key.is_some() || self.attempted_at.is_some()
+        self.subscription_id.is_some() || self.period_start.is_some() || self.period_end.is_some() || self.due_date.is_some() || self.grand_total.is_some() || self.status.is_some() || self.invoice_id.is_some() || self.idempotency_key.is_some() || self.attempted_at.is_some()
     }
 }
 
@@ -168,8 +159,6 @@ pub struct SubscriptionBillingRunResponseDto {
     pub id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub subscription_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01"))]
     pub period_start: NaiveDate,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01"))]
@@ -240,8 +229,8 @@ impl SubscriptionBillingRunListResponseDto {
 pub struct SubscriptionBillingRunSummaryDto {
     pub id: Uuid,
     pub subscription_id: Uuid,
-    pub company_id: Uuid,
     pub period_start: NaiveDate,
+    pub period_end: NaiveDate,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -254,7 +243,6 @@ impl From<SubscriptionBillingRun> for SubscriptionBillingRunResponseDto {
         Self {
             id: entity.id,
             subscription_id: entity.subscription_id,
-            company_id: entity.company_id,
             period_start: entity.period_start,
             period_end: entity.period_end,
             due_date: entity.due_date,
@@ -274,8 +262,8 @@ impl From<SubscriptionBillingRun> for SubscriptionBillingRunSummaryDto {
         Self {
             id: entity.id,
             subscription_id: entity.subscription_id,
-            company_id: entity.company_id,
             period_start: entity.period_start,
+            period_end: entity.period_end,
             created_at,
         }
     }
@@ -286,7 +274,6 @@ impl From<CreateSubscriptionBillingRunDto> for SubscriptionBillingRun {
         Self {
             id: Uuid::new_v4(),
             subscription_id: dto.subscription_id,
-            company_id: dto.company_id,
             period_start: dto.period_start,
             period_end: dto.period_end,
             due_date: dto.due_date,
@@ -305,7 +292,6 @@ impl From<&SubscriptionBillingRun> for SubscriptionBillingRunResponseDto {
         Self {
             id: entity.id.clone(),
             subscription_id: entity.subscription_id.clone(),
-            company_id: entity.company_id.clone(),
             period_start: entity.period_start.clone(),
             period_end: entity.period_end.clone(),
             due_date: entity.due_date.clone(),
@@ -328,7 +314,6 @@ impl backbone_core::FromCreateDto<CreateSubscriptionBillingRunDto> for Subscript
 impl backbone_core::ApplyUpdateDto<UpdateSubscriptionBillingRunDto> for SubscriptionBillingRun {
     fn apply_update(mut self, dto: UpdateSubscriptionBillingRunDto) -> backbone_core::ServiceResult<Self> {
         self.subscription_id = dto.subscription_id;
-        self.company_id = dto.company_id;
         self.period_start = dto.period_start;
         self.period_end = dto.period_end;
         self.due_date = dto.due_date;
@@ -349,4 +334,3 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionBillingRunDto> for Subscrip
 // Add custom DTOs specific to SubscriptionBillingRun here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
-

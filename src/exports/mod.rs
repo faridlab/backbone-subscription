@@ -8,7 +8,7 @@
 //! ## Usage from other modules
 //!
 //! ```text
-//! use subscription::exports::{SubscriptionDto, SubscriptionQueryService};
+//! use subscription::exports::{SubscriptionDto};
 //! ```
 
 mod types;
@@ -39,9 +39,6 @@ pub use events::*;
 /// - `SubscriptionPlanLineDto` - Data transfer object for SubscriptionPlanLine
 /// - `SubscriptionPlanLineSummary` - Summary view of SubscriptionPlanLine
 /// - `SubscriptionPlanLineId` - Type-safe ID wrapper
-///
-/// ## Public Services
-/// - `SubscriptionQueryService` - Read-only queries
 ///
 /// ## Public Events
 /// - `SubscriptionCreatedEvent` - Published when Subscription is created

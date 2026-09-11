@@ -45,7 +45,6 @@ pub struct SubscriptionBillingRunPaginatedResult {
 #[derive(Debug, Clone, Default)]
 pub struct SubscriptionBillingRunFilter {
     pub subscription_id: Option<Uuid>,
-    pub company_id: Option<Uuid>,
     pub status: Option<BillingRunStatus>,
     pub invoice_id: Option<Uuid>,
     pub idempotency_key: Option<String>,
@@ -54,7 +53,7 @@ pub struct SubscriptionBillingRunFilter {
 impl SubscriptionBillingRunFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.subscription_id.is_some() || self.company_id.is_some() || self.status.is_some() || self.invoice_id.is_some() || self.idempotency_key.is_some()
+        self.subscription_id.is_some() || self.status.is_some() || self.invoice_id.is_some() || self.idempotency_key.is_some()
     }
 }
 

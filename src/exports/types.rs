@@ -50,7 +50,6 @@ impl From<SubscriptionId> for Uuid {
 pub struct SubscriptionDto {
     pub id: SubscriptionId,
     pub subscription_number: String,
-    pub company_id: Uuid,
     pub customer_id: Uuid,
     pub plan_id: Uuid,
     pub branch_id: Option<Uuid>,
@@ -117,7 +116,6 @@ impl From<SubscriptionBillingRunId> for Uuid {
 pub struct SubscriptionBillingRunDto {
     pub id: SubscriptionBillingRunId,
     pub subscription_id: Uuid,
-    pub company_id: Uuid,
     pub period_start: NaiveDate,
     pub period_end: NaiveDate,
     pub due_date: NaiveDate,
@@ -183,7 +181,6 @@ pub struct SubscriptionPlanDto {
     pub plan_code: String,
     pub name: String,
     pub description: Option<String>,
-    pub company_id: Uuid,
     pub billing_cycle: BillingCycle,
     pub billing_day: i32,
     pub currency: String,

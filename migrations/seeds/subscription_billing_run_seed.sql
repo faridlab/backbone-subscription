@@ -7,7 +7,6 @@
 -- INSERT INTO subscription.subscription_billing_runs (
 --     id,
 --     subscription_id,
---     company_id,
 --     period_start,
 --     period_end,
 --     due_date,

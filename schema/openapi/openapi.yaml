@@ -1492,7 +1492,6 @@ components:
       required:
         - id
         - subscription_number
-        - company_id
         - customer_id
         - plan_id
         - status
@@ -1509,9 +1508,6 @@ components:
         subscription_number:
           type: string
           maxLength: 40
-        company_id:
-          type: string
-          format: uuid
         customer_id:
           type: string
           format: uuid
@@ -1567,7 +1563,6 @@ components:
       type: object
       required:
         - subscription_number
-        - company_id
         - customer_id
         - plan_id
         - status
@@ -1581,9 +1576,6 @@ components:
         subscription_number:
           type: string
           maxLength: 40
-        company_id:
-          type: string
-          format: uuid
         customer_id:
           type: string
           format: uuid
@@ -1626,7 +1618,6 @@ components:
       type: object
       required:
         - subscription_number
-        - company_id
         - customer_id
         - plan_id
         - status
@@ -1640,9 +1631,6 @@ components:
         subscription_number:
           type: string
           maxLength: 40
-        company_id:
-          type: string
-          format: uuid
         customer_id:
           type: string
           format: uuid
@@ -1687,9 +1675,6 @@ components:
         subscription_number:
           type: string
           maxLength: 40
-        company_id:
-          type: string
-          format: uuid
         customer_id:
           type: string
           format: uuid
@@ -1743,7 +1728,6 @@ components:
       required:
         - id
         - subscription_id
-        - company_id
         - period_start
         - period_end
         - due_date
@@ -1756,9 +1740,6 @@ components:
           type: string
           format: uuid
         subscription_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         period_start:
@@ -1805,7 +1786,6 @@ components:
       type: object
       required:
         - subscription_id
-        - company_id
         - period_start
         - period_end
         - due_date
@@ -1815,9 +1795,6 @@ components:
         - metadata
       properties:
         subscription_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         period_start:
@@ -1851,7 +1828,6 @@ components:
       type: object
       required:
         - subscription_id
-        - company_id
         - period_start
         - period_end
         - due_date
@@ -1861,9 +1837,6 @@ components:
         - metadata
       properties:
         subscription_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         period_start:
@@ -1897,9 +1870,6 @@ components:
       type: object
       properties:
         subscription_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         period_start:
@@ -1945,7 +1915,6 @@ components:
         - id
         - plan_code
         - name
-        - company_id
         - billing_cycle
         - billing_day
         - currency
@@ -1965,9 +1934,6 @@ components:
         description:
           nullable: true
           type: string
-        company_id:
-          type: string
-          format: uuid
         billing_cycle:
           type: string
         billing_day:
@@ -2008,7 +1974,6 @@ components:
       required:
         - plan_code
         - name
-        - company_id
         - billing_cycle
         - billing_day
         - currency
@@ -2025,9 +1990,6 @@ components:
         description:
           nullable: true
           type: string
-        company_id:
-          type: string
-          format: uuid
         billing_cycle:
           type: string
         billing_day:
@@ -2055,7 +2017,6 @@ components:
       required:
         - plan_code
         - name
-        - company_id
         - billing_cycle
         - billing_day
         - currency
@@ -2072,9 +2033,6 @@ components:
         description:
           nullable: true
           type: string
-        company_id:
-          type: string
-          format: uuid
         billing_cycle:
           type: string
         billing_day:
@@ -2108,9 +2066,6 @@ components:
         description:
           nullable: true
           type: string
-        company_id:
-          type: string
-          format: uuid
         billing_cycle:
           type: string
         billing_day:

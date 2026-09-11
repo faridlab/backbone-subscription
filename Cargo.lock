@@ -235,8 +235,8 @@ dependencies = [
 
 [[package]]
 name = "backbone-billing"
-version = "0.5.7"
-source = "git+https://github.com/faridlab/backbone-billing?tag=v0.5.7#bb8ee10762a34f1569f82e982dcc60b73d38cc90"
+version = "0.6.0"
+source = "git+https://github.com/faridlab/backbone-billing?tag=v0.6.0#9bafff410371ecd9244bcb40db0861228a529cd8"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -358,7 +358,7 @@ dependencies = [
 
 [[package]]
 name = "backbone-subscription"
-version = "0.2.7"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -399,8 +399,8 @@ dependencies = [
 
 [[package]]
 name = "backbone-tax"
-version = "0.4.8"
-source = "git+https://github.com/faridlab/backbone-tax?tag=v0.4.8#ebf1a7029a7c6bddb947027d8efa6e646a8b129d"
+version = "0.5.0"
+source = "git+https://github.com/faridlab/backbone-tax?tag=v0.5.0#07ee64d7d8a560a928f4367fd80176827225f490"
 dependencies = [
  "anyhow",
  "async-trait",

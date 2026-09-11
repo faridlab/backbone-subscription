@@ -23,6 +23,7 @@ pub mod infrastructure;
 pub mod application;
 pub mod presentation;
 pub mod seeders;
+pub mod exports;
 
 // Re-exports for convenience - Domain entities
 pub use domain::entity::*;
@@ -53,10 +54,12 @@ use sqlx::PgPool;
 /// let router = subscription.all_crud_routes();
 /// ```
 pub struct SubscriptionModule {
-    pub subscription_service: Arc<SubscriptionService>,
-    pub subscription_billing_run_service: Arc<SubscriptionBillingRunService>,
-    pub subscription_plan_service: Arc<SubscriptionPlanService>,
-    pub subscription_plan_line_service: Arc<SubscriptionPlanLineService>,
+    pub(crate) subscription_service: Arc<SubscriptionService>,
+    pub(crate) subscription_billing_run_service: Arc<SubscriptionBillingRunService>,
+    pub(crate) subscription_plan_service: Arc<SubscriptionPlanService>,
+    pub(crate) subscription_plan_line_service: Arc<SubscriptionPlanLineService>,
+    // <<< CUSTOM FIELDS
+    // END CUSTOM
 }
 
 impl SubscriptionModule {
@@ -90,10 +93,33 @@ impl SubscriptionModule {
     /// mount exposes unguarded writes. Compose a guarded router (read + validated
     /// writes) for production, or call `all_crud_routes()` to opt into the full
     /// unguarded surface explicitly.
-    #[deprecated(note = "mounts unvalidated generic CRUD on every entity; compose a guarded router for production, or call all_crud_routes() for the intentional full/unguarded surface")]
+    #[deprecated(note = "mounts unvalidated generic CRUD; prefer readonly_routes() + validated writes, or all_crud_routes() for the full/unguarded surface")]
     pub fn routes(&self) -> Router {
         self.all_crud_routes()
     }
+
+    /// Read-only routes for every entity (GET endpoints only) — the safe base.
+    ///
+    /// Generic mutation can't reach here, so this surface cannot bypass a
+    /// validated write service's invariants. Use this as the production base and
+    /// merge validated write routes (or a write service's HTTP layer) onto it.
+    pub fn readonly_routes(&self) -> Router {
+        use presentation::http::{
+            create_subscription_read_routes,
+            create_subscription_billing_run_read_routes,
+            create_subscription_plan_read_routes,
+            create_subscription_plan_line_read_routes,
+        };
+
+        Router::new()
+            .merge(create_subscription_read_routes(self.subscription_service.clone()))
+            .merge(create_subscription_billing_run_read_routes(self.subscription_billing_run_service.clone()))
+            .merge(create_subscription_plan_read_routes(self.subscription_plan_service.clone()))
+            .merge(create_subscription_plan_line_read_routes(self.subscription_plan_line_service.clone()))
+    }
+
+    // <<< CUSTOM METHODS
+    // END CUSTOM
 }
 
 /// Builder for SubscriptionModule

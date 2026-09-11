@@ -51,7 +51,6 @@ impl std::ops::Deref for SubscriptionId {
 pub struct Subscription {
     pub id: Uuid,
     pub subscription_number: String,
-    pub company_id: Uuid,
     pub customer_id: Uuid,
     pub plan_id: Uuid,
     pub branch_id: Option<Uuid>,
@@ -71,15 +70,14 @@ pub struct Subscription {
 impl Subscription {
     /// Create a builder for Subscription
     pub fn builder() -> SubscriptionBuilder {
-        SubscriptionBuilder::default()
+        <SubscriptionBuilder as Default>::default()
     }
 
     /// Create a new Subscription with required fields
-    pub fn new(subscription_number: String, company_id: Uuid, customer_id: Uuid, plan_id: Uuid, status: SubscriptionStatus, started_at: NaiveDate, current_period_start: NaiveDate, current_period_end: NaiveDate, next_billing_date: NaiveDate, currency: String) -> Self {
+    pub fn new(subscription_number: String, customer_id: Uuid, plan_id: Uuid, status: SubscriptionStatus, started_at: NaiveDate, current_period_start: NaiveDate, current_period_end: NaiveDate, next_billing_date: NaiveDate, currency: String) -> Self {
         Self {
             id: Uuid::new_v4(),
             subscription_number,
-            company_id,
             customer_id,
             plan_id,
             branch_id: None,
@@ -184,9 +182,6 @@ impl Subscription {
                 "subscription_number" => {
                     if let Ok(v) = serde_json::from_value(value) { self.subscription_number = v; }
                 }
-                "company_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.company_id = v; }
-                }
                 "customer_id" => {
                     if let Ok(v) = serde_json::from_value(value) { self.customer_id = v; }
                 }
@@ -274,7 +269,6 @@ impl backbone_orm::EntityRepoMeta for Subscription {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("company_id".to_string(), "uuid".to_string());
         m.insert("customer_id".to_string(), "uuid".to_string());
         m.insert("plan_id".to_string(), "uuid".to_string());
         m.insert("branch_id".to_string(), "uuid".to_string());
@@ -283,9 +277,6 @@ impl backbone_orm::EntityRepoMeta for Subscription {
     }
     fn search_fields() -> &'static [&'static str] {
         &["subscription_number", "currency"]
-    }
-    fn company_field() -> Option<&'static str> {
-        Some("company_id")
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("plan", "subscription_plans", "planId")]
@@ -299,7 +290,6 @@ impl backbone_orm::EntityRepoMeta for Subscription {
 #[derive(Debug, Clone, Default)]
 pub struct SubscriptionBuilder {
     subscription_number: Option<String>,
-    company_id: Option<Uuid>,
     customer_id: Option<Uuid>,
     plan_id: Option<Uuid>,
     branch_id: Option<Uuid>,
@@ -317,12 +307,6 @@ impl SubscriptionBuilder {
     /// Set the subscription_number field (required)
     pub fn subscription_number(mut self, value: String) -> Self {
         self.subscription_number = Some(value);
-        self
-    }
-
-    /// Set the company_id field (required)
-    pub fn company_id(mut self, value: Uuid) -> Self {
-        self.company_id = Some(value);
         self
     }
 
@@ -397,7 +381,6 @@ impl SubscriptionBuilder {
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<Subscription, String> {
         let subscription_number = self.subscription_number.ok_or_else(|| "subscription_number is required".to_string())?;
-        let company_id = self.company_id.ok_or_else(|| "company_id is required".to_string())?;
         let customer_id = self.customer_id.ok_or_else(|| "customer_id is required".to_string())?;
         let plan_id = self.plan_id.ok_or_else(|| "plan_id is required".to_string())?;
         let started_at = self.started_at.ok_or_else(|| "started_at is required".to_string())?;
@@ -408,11 +391,10 @@ impl SubscriptionBuilder {
         Ok(Subscription {
             id: Uuid::new_v4(),
             subscription_number,
-            company_id,
             customer_id,
             plan_id,
             branch_id: self.branch_id,
-            status: self.status.unwrap_or(SubscriptionStatus::default()),
+            status: self.status.unwrap_or_default(),
             started_at,
             current_period_start,
             current_period_end,

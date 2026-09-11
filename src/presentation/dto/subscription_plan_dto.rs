@@ -43,9 +43,6 @@ pub struct CreateSubscriptionPlanDto {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[serde(alias = "billing_cycle")]
     pub billing_cycle: BillingCycle,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
@@ -84,9 +81,6 @@ pub struct UpdateSubscriptionPlanDto {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[serde(alias = "billing_cycle")]
     pub billing_cycle: BillingCycle,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
@@ -126,9 +120,6 @@ pub struct PatchSubscriptionPlanDto {
     pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "billing_cycle")]
     pub billing_cycle: Option<BillingCycle>,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
@@ -152,7 +143,7 @@ pub struct PatchSubscriptionPlanDto {
 impl PatchSubscriptionPlanDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.plan_code.is_some() || self.name.is_some() || self.description.is_some() || self.company_id.is_some() || self.billing_cycle.is_some() || self.billing_day.is_some() || self.currency.is_some() || self.receivable_account_id.is_some() || self.price.is_some() || self.trial_days.is_some() || self.status.is_some()
+        self.plan_code.is_some() || self.name.is_some() || self.description.is_some() || self.billing_cycle.is_some() || self.billing_day.is_some() || self.currency.is_some() || self.receivable_account_id.is_some() || self.price.is_some() || self.trial_days.is_some() || self.status.is_some()
     }
 }
 
@@ -175,8 +166,6 @@ pub struct SubscriptionPlanResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub name: String,
     pub description: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     pub billing_cycle: BillingCycle,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub billing_day: i32,
@@ -261,7 +250,6 @@ impl From<SubscriptionPlan> for SubscriptionPlanResponseDto {
             plan_code: entity.plan_code,
             name: entity.name,
             description: entity.description,
-            company_id: entity.company_id,
             billing_cycle: entity.billing_cycle,
             billing_day: entity.billing_day,
             currency: entity.currency,
@@ -294,7 +282,6 @@ impl From<CreateSubscriptionPlanDto> for SubscriptionPlan {
             plan_code: dto.plan_code,
             name: dto.name,
             description: dto.description,
-            company_id: dto.company_id,
             billing_cycle: dto.billing_cycle,
             billing_day: dto.billing_day,
             currency: dto.currency,
@@ -314,7 +301,6 @@ impl From<&SubscriptionPlan> for SubscriptionPlanResponseDto {
             plan_code: entity.plan_code.clone(),
             name: entity.name.clone(),
             description: entity.description.clone(),
-            company_id: entity.company_id.clone(),
             billing_cycle: entity.billing_cycle.clone(),
             billing_day: entity.billing_day.clone(),
             currency: entity.currency.clone(),
@@ -338,7 +324,6 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionPlanDto> for SubscriptionPl
         self.plan_code = dto.plan_code;
         self.name = dto.name;
         self.description = dto.description;
-        self.company_id = dto.company_id;
         self.billing_cycle = dto.billing_cycle;
         self.billing_day = dto.billing_day;
         self.currency = dto.currency;
@@ -358,4 +343,3 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionPlanDto> for SubscriptionPl
 // Add custom DTOs specific to SubscriptionPlan here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
-

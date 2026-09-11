@@ -22,9 +22,17 @@ pub struct DueLine {
 
 /// Emitted when a subscription's period is due. The composition ACL maps this to a
 /// `NewSalesInvoice` and calls billing to create + post it.
+///
+/// Tenancy (ADR-0029): `company_id` is the legacy twin — kept so still-company-shaped
+/// consumers (the billing seam) compile and run unchanged. The module keys no statement on
+/// it: the write service fills it with the ambient org scope's legacy company echo (nil on
+/// an undecorated deployment), and isolation comes from the composing service's tenancy
+/// decorator, never from this field.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SubscriptionInvoiceDue {
     pub subscription_id: Uuid,
+    /// Legacy tenancy twin (ADR-0029): ambient org scope's legacy company echo; read-only
+    /// handoff for still-company-shaped consumers, never a fence.
     pub company_id: Uuid,
     pub customer_id: Uuid,
     pub branch_id: Option<Uuid>,

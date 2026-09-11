@@ -7,7 +7,6 @@
 -- INSERT INTO subscription.subscriptions (
 --     id,
 --     subscription_number,
---     company_id,
 --     customer_id,
 --     plan_id,
 --     branch_id,

@@ -50,7 +50,7 @@ pub struct PlanLineRow {
 /// Cadence blueprint SQL. Lives here (not in the write service) per the module's 4-layer rule.
 impl SubscriptionPlanLineRepository {
     /// A plan's live blueprint lines. Read via the bare pool the caller supplies — the cadence sweep
-    /// is cross-company (see `SubscriptionRepository::find_due_plans`).
+    /// spans every org unit (see `SubscriptionRepository::find_due_plans`).
     pub async fn find_blueprint_by_plan(
         &self,
         pool: &PgPool,

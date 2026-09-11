@@ -42,7 +42,6 @@ impl SubscriptionBillingRunRepository {
 pub struct NewBillingRunRow {
     pub id: Uuid,
     pub subscription_id: Uuid,
-    pub company_id: Uuid,
     pub period_start: NaiveDate,
     pub period_end: NaiveDate,
     pub due_date: NaiveDate,
@@ -54,8 +53,8 @@ pub struct NewBillingRunRow {
 impl SubscriptionBillingRunRepository {
     /// Exactly one billing run per (subscription, period): `ON CONFLICT (subscription_id, period_start)
     /// DO NOTHING RETURNING id`. Returns the id when THIS caller created the run (the winner), or
-    /// `None` when a run already existed (a re-tick). Takes the CALLER'S connection (company already
-    /// bound) so the run + the period advance + the outbox event commit as one unit.
+    /// `None` when a run already existed (a re-tick). Takes the CALLER'S connection (the ambient org
+    /// scope already relayed) so the run + the period advance + the outbox event commit as one unit.
     pub async fn insert_pending_run_on_conflict_nothing(
         &self,
         conn: &mut PgConnection,
@@ -63,13 +62,13 @@ impl SubscriptionBillingRunRepository {
     ) -> Result<Option<Uuid>, sqlx::Error> {
         let row = sqlx::query(
             r#"INSERT INTO subscription.subscription_billing_runs
-                 (id, subscription_id, company_id, period_start, period_end, due_date,
+                 (id, subscription_id, period_start, period_end, due_date,
                   grand_total, status, idempotency_key)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending'::billing_run_status, $8)
+               VALUES ($1, $2, $3, $4, $5, $6, 'pending'::billing_run_status, $7)
                ON CONFLICT (subscription_id, period_start) WHERE (metadata->>'deleted_at') IS NULL
                DO NOTHING RETURNING id"#,
         )
-        .bind(r.id).bind(r.subscription_id).bind(r.company_id)
+        .bind(r.id).bind(r.subscription_id)
         .bind(r.period_start).bind(r.period_end).bind(r.due_date)
         .bind(r.grand_total).bind(&r.idempotency_key)
         .fetch_optional(conn).await?;

@@ -47,7 +47,6 @@ pub struct SubscriptionPlanFilter {
     pub plan_code: Option<String>,
     pub name: Option<String>,
     pub description: Option<String>,
-    pub company_id: Option<Uuid>,
     pub billing_cycle: Option<BillingCycle>,
     pub currency: Option<String>,
     pub receivable_account_id: Option<Uuid>,
@@ -57,7 +56,7 @@ pub struct SubscriptionPlanFilter {
 impl SubscriptionPlanFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.plan_code.is_some() || self.name.is_some() || self.description.is_some() || self.company_id.is_some() || self.billing_cycle.is_some() || self.currency.is_some() || self.receivable_account_id.is_some() || self.status.is_some()
+        self.plan_code.is_some() || self.name.is_some() || self.description.is_some() || self.billing_cycle.is_some() || self.currency.is_some() || self.receivable_account_id.is_some() || self.status.is_some()
     }
 }
 

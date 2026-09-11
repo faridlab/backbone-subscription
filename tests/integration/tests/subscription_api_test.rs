@@ -25,7 +25,6 @@ impl TestDataGenerator for SubscriptionTestData {
         json!({
             "id": Uuid::new_v4().to_string(),
             "subscription_number": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
-            "company_id": Uuid::new_v4().to_string(),
             "customer_id": Uuid::new_v4().to_string(),
             "plan_id": Uuid::new_v4().to_string(),
             "branch_id": null,
@@ -46,7 +45,6 @@ impl TestDataGenerator for SubscriptionTestData {
         json!({
             "id": id,
             "subscription_number": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
-            "company_id": Uuid::new_v4().to_string(),
             "customer_id": Uuid::new_v4().to_string(),
             "plan_id": Uuid::new_v4().to_string(),
             "branch_id": null,

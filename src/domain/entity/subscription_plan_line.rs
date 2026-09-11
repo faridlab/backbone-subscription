@@ -63,7 +63,7 @@ pub struct SubscriptionPlanLine {
 impl SubscriptionPlanLine {
     /// Create a builder for SubscriptionPlanLine
     pub fn builder() -> SubscriptionPlanLineBuilder {
-        SubscriptionPlanLineBuilder::default()
+        <SubscriptionPlanLineBuilder as Default>::default()
     }
 
     /// Create a new SubscriptionPlanLine with required fields

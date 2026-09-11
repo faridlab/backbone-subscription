@@ -14,10 +14,15 @@ version: 2
 schema: subscription
 description: "Recurring/subscription billing: owns subscription plans, recurrence, and the cadence that generates Sales Invoices into backbone-billing. Subscription owns the plan + recurrence + billing run; the invoice itself lives in billing (zero normal Cargo edges — handoff via a serialized SubscriptionInvoiceDue event + composition ACL)."
 
-# ADR-0014 company fence: subscriptions, plans, and billing runs are company-scoped
-# and fenced strict. subscription_plan_lines is parent-scoped (no direct company_id;
-# reaches the fence through subscription_plans) — implicitly excluded.
-company_fence: strict
+# Tenancy: none, by design (ADR-0029) — the composing service installs the org-unit
+# axis via its decorator; this module is tenant-agnostic. It ships no scoping column
+# and no fence declaration. A composing backend-service that wants these tables
+# org-scoped declares them in its tenancy.yaml; the decorator installs org_unit_id,
+# the RLS policy, and the org-scoped per-unit listing indexes (plan status, customer
+# status, billing-run status) at composition time. subscription_plan_lines is
+# parent-scoped (reaches the unit through subscription_plans). The domain uniques
+# (plan_code, subscription_number, subscription+period, idempotency_key) stay
+# module-level and tenant-free.
 
 config:
   database: postgresql
