@@ -235,8 +235,8 @@ dependencies = [
 
 [[package]]
 name = "backbone-billing"
-version = "0.8.8"
-source = "git+https://github.com/faridlab/backbone-billing?tag=v0.8.8#6250715f79cbc25c421e666c3306fef4c9207243"
+version = "0.8.9"
+source = "git+https://github.com/faridlab/backbone-billing?tag=v0.8.9#9689c603040d0243a688ce1cf39b614ba136fad8"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -359,7 +359,7 @@ dependencies = [
 
 [[package]]
 name = "backbone-subscription"
-version = "0.3.10"
+version = "0.3.11"
 dependencies = [
  "anyhow",
  "async-trait",
