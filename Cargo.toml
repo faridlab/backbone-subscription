@@ -3,6 +3,7 @@ name = "backbone-subscription"
 version = "0.3.24"
 edition = "2021"
 description = "Recurring/subscription billing: owns subscription plans, recurrence schedules, and cadence-driven generation of Sales Invoices into backbone-billing. The subscription counterpart to billing's spot invoicing."
+license = "MIT OR Apache-2.0"
 
 [lib]
 path = "src/lib.rs"
