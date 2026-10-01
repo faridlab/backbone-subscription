@@ -1,9 +1,11 @@
 [package]
 name = "backbone-subscription"
-version = "0.3.25"
+version = "0.3.26"
 edition = "2021"
 description = "Recurring/subscription billing: owns subscription plans, recurrence schedules, and cadence-driven generation of Sales Invoices into backbone-billing. The subscription counterpart to billing's spot invoicing."
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/faridlab/backbone-subscription"
+exclude = [".claude/", ".github/", "graphify-out/"]
 
 [lib]
 path = "src/lib.rs"
@@ -18,15 +20,15 @@ path = "src/lib.rs"
 # or `rev = "<commit-sha>"`. Cargo dedupes the git fetch — the repo is only
 # cloned once even though four crates reference it.
 # -----------------------------------------------------------------------------
-backbone-core = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27", features = ["postgres"] }
-backbone-orm = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27" }
-backbone-auth = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27" }
-backbone-messaging = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27" }
+backbone-core = { version = "2.7.35", features = ["postgres"] }
+backbone-orm = { version = "2.7.35" }
+backbone-auth = { version = "2.7.35" }
+backbone-messaging = { version = "2.7.35" }
 # Durable outbox — the cadence stages SubscriptionInvoiceDue into <schema>.outbox_events
 # atomically with the period advance (mirrors backbone-payment/backbone-billing).
 # Same dual-mode wiring: committed source is the framework git tag; .cargo/config.toml
 # (gitignored) patches it to ../backbone-framework/backbone-outbox for local workspace dev.
-backbone-outbox = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27" }
+backbone-outbox = { version = "2.7.35" }
 
 # Core async runtime and serialization
 tokio = { version = "1.0", features = ["full"] }
@@ -100,4 +102,4 @@ rand = "0.8"
 # (create_sales_invoice + post_sales_invoice) through an in-test ACL, proving the cadence
 # produces a real posted invoice. Dev-dependency ONLY — the shipped subscription library
 # has ZERO normal edges into billing (verify: `cargo tree -e normal -i backbone-billing`).
-backbone-billing = { git = "https://github.com/faridlab/backbone-billing", tag = "v0.8.24" }
+backbone-billing = { path = "../backbone-billing" }
