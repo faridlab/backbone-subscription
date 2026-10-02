@@ -102,4 +102,4 @@ rand = "0.8"
 # (create_sales_invoice + post_sales_invoice) through an in-test ACL, proving the cadence
 # produces a real posted invoice. Dev-dependency ONLY — the shipped subscription library
 # has ZERO normal edges into billing (verify: `cargo tree -e normal -i backbone-billing`).
-backbone-billing = { path = "../backbone-billing" }
+backbone-billing = { version = "0.8.25" }
