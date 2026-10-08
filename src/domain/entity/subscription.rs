@@ -273,6 +273,12 @@ impl backbone_orm::EntityRepoMeta for Subscription {
         m.insert("plan_id".to_string(), "uuid".to_string());
         m.insert("branch_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "subscription_status".to_string());
+        m.insert("started_at".to_string(), "date".to_string());
+        m.insert("current_period_start".to_string(), "date".to_string());
+        m.insert("current_period_end".to_string(), "date".to_string());
+        m.insert("next_billing_date".to_string(), "date".to_string());
+        m.insert("cancelled_at".to_string(), "date".to_string());
+        m.insert("ended_at".to_string(), "date".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

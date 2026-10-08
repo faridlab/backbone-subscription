@@ -252,6 +252,10 @@ impl backbone_orm::EntityRepoMeta for SubscriptionBillingRun {
         m.insert("subscription_id".to_string(), "uuid".to_string());
         m.insert("invoice_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "billing_run_status".to_string());
+        m.insert("period_start".to_string(), "date".to_string());
+        m.insert("period_end".to_string(), "date".to_string());
+        m.insert("due_date".to_string(), "date".to_string());
+        m.insert("attempted_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

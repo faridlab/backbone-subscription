@@ -24,6 +24,8 @@ pub mod application;
 pub mod presentation;
 pub mod seeders;
 pub mod exports;
+// <<< CUSTOM MODULES
+// END CUSTOM
 
 // Re-exports for convenience - Domain entities
 pub use domain::entity::*;
@@ -36,6 +38,9 @@ pub use application::service::SubscriptionService;
 pub use application::service::SubscriptionBillingRunService;
 pub use application::service::SubscriptionPlanService;
 pub use application::service::SubscriptionPlanLineService;
+
+// Re-exports - Validation
+pub use application::validator::{ValidationError, ValidationResult};
 
 use std::sync::Arc;
 use axum::Router;
@@ -125,6 +130,8 @@ impl SubscriptionModule {
 /// Builder for SubscriptionModule
 pub struct SubscriptionModuleBuilder {
     db_pool: Option<PgPool>,
+    // <<< CUSTOM BUILDER FIELDS
+    // END CUSTOM
 }
 
 impl SubscriptionModuleBuilder {
@@ -132,6 +139,8 @@ impl SubscriptionModuleBuilder {
     pub fn new() -> Self {
         Self {
             db_pool: None,
+            // <<< CUSTOM BUILDER DEFAULTS
+            // END CUSTOM
         }
     }
 
