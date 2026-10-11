@@ -13,12 +13,6 @@ pub mod subscription_plan_service;
 pub mod subscription_plan_line_service;
 
 // <<< CUSTOM
-pub mod subscription_events;
-pub mod subscription_write_service;
-pub use subscription_events::{
-    DueLine, LoggingSink, SubscriptionEvent, SubscriptionEventSink, SubscriptionInvoiceDue,
-};
-pub use subscription_write_service::{SubscriptionError, SubscriptionWriteService};
 // END CUSTOM
 
 pub use subscription_service::SubscriptionService;
@@ -27,3 +21,6 @@ pub use subscription_plan_service::SubscriptionPlanService;
 pub use subscription_plan_line_service::SubscriptionPlanLineService;
 // <<< CUSTOM
 // END CUSTOM
+
+// This directory's extension (hand-written; ADR-0031).
+include!("mod.ext.rs");
