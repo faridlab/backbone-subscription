@@ -131,6 +131,4 @@ mod tests {
 // CUSTOM TESTS
 // ============================================================================
 
-// <<< CUSTOM TESTS START >>>
 // Add Subscription specific tests here
-// <<< CUSTOM TESTS END >>>

@@ -339,7 +339,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionPlanDto> for SubscriptionPl
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to SubscriptionPlan here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

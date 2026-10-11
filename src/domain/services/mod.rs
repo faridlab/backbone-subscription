@@ -12,5 +12,3 @@ pub use subscription_billing_run_domain_policy::SubscriptionBillingRunDomainPoli
 pub use subscription_plan_domain_policy::SubscriptionPlanDomainPolicy;
 pub use subscription_plan_line_domain_policy::SubscriptionPlanLineDomainPolicy;
 
-// <<< CUSTOM
-// END CUSTOM

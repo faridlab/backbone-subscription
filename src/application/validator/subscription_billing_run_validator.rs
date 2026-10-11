@@ -16,9 +16,5 @@ pub type SubscriptionBillingRunValidator = EntityValidator<SubscriptionBillingRu
 pub fn subscription_billing_run_validator() -> SubscriptionBillingRunValidator {
     EntityValidator::new()
         .rule(RequiredString::new("idempotency_key", |e: &SubscriptionBillingRun| &e.idempotency_key))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

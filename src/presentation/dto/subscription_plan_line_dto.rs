@@ -285,7 +285,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionPlanLineDto> for Subscripti
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to SubscriptionPlanLine here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

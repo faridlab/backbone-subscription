@@ -24,8 +24,6 @@ pub mod application;
 pub mod presentation;
 pub mod seeders;
 pub mod exports;
-// <<< CUSTOM MODULES
-// END CUSTOM
 
 // Re-exports for convenience - Domain entities
 pub use domain::entity::*;
@@ -63,8 +61,6 @@ pub struct SubscriptionModule {
     pub(crate) subscription_billing_run_service: Arc<SubscriptionBillingRunService>,
     pub(crate) subscription_plan_service: Arc<SubscriptionPlanService>,
     pub(crate) subscription_plan_line_service: Arc<SubscriptionPlanLineService>,
-    // <<< CUSTOM FIELDS
-    // END CUSTOM
 }
 
 impl SubscriptionModule {
@@ -123,15 +119,11 @@ impl SubscriptionModule {
             .merge(create_subscription_plan_line_read_routes(self.subscription_plan_line_service.clone()))
     }
 
-    // <<< CUSTOM METHODS
-    // END CUSTOM
 }
 
 /// Builder for SubscriptionModule
 pub struct SubscriptionModuleBuilder {
     db_pool: Option<PgPool>,
-    // <<< CUSTOM BUILDER FIELDS
-    // END CUSTOM
 }
 
 impl SubscriptionModuleBuilder {
@@ -139,8 +131,6 @@ impl SubscriptionModuleBuilder {
     pub fn new() -> Self {
         Self {
             db_pool: None,
-            // <<< CUSTOM BUILDER DEFAULTS
-            // END CUSTOM
         }
     }
 
@@ -150,8 +140,6 @@ impl SubscriptionModuleBuilder {
         self
     }
 
-    // <<< CUSTOM - custom builder methods
-    // END CUSTOM
 
     /// Build the module with configured dependencies
     pub fn build(self) -> anyhow::Result<SubscriptionModule> {
@@ -174,16 +162,12 @@ impl SubscriptionModuleBuilder {
         let subscription_plan_line_repository = Arc::new(SubscriptionPlanLineRepository::new(db_pool.clone()));
         let subscription_plan_line_service = Arc::new(SubscriptionPlanLineService::with_repository(subscription_plan_line_repository.clone()));
 
-        // <<< CUSTOM
-        // END CUSTOM
 
         Ok(SubscriptionModule {
             subscription_service,
             subscription_billing_run_service,
             subscription_plan_service,
             subscription_plan_line_service,
-            // <<< CUSTOM
-            // END CUSTOM
         })
     }
 }

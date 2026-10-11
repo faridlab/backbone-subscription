@@ -15,5 +15,3 @@ pub use subscription_billing_run_validator::{SubscriptionBillingRunValidator, su
 pub use subscription_plan_validator::{SubscriptionPlanValidator, subscription_plan_validator};
 pub use subscription_plan_line_validator::{SubscriptionPlanLineValidator, subscription_plan_line_validator};
 
-// <<< CUSTOM
-// END CUSTOM

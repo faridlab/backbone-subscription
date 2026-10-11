@@ -375,7 +375,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionDto> for Subscription {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to Subscription here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

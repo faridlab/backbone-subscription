@@ -330,7 +330,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionBillingRunDto> for Subscrip
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to SubscriptionBillingRun here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

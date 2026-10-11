@@ -200,8 +200,6 @@ impl SubscriptionBillingRun {
         }
     }
 
-    // <<< CUSTOM METHODS START >>>
-    // <<< CUSTOM METHODS END >>>
 }
 
 impl super::Entity for SubscriptionBillingRun {

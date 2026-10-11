@@ -11,5 +11,3 @@ pub mod subscription_billing_run_specification;
 pub mod subscription_plan_specification;
 pub mod subscription_plan_line_specification;
 
-// <<< CUSTOM
-// END CUSTOM

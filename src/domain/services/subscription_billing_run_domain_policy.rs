@@ -18,5 +18,3 @@ use crate::domain::entity::SubscriptionBillingRun;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type SubscriptionBillingRunDomainPolicy = PermitAllPolicy<SubscriptionBillingRun>;
 
-// <<< CUSTOM
-// END CUSTOM

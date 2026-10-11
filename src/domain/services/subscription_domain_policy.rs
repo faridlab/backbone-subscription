@@ -18,5 +18,3 @@ use crate::domain::entity::Subscription;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type SubscriptionDomainPolicy = PermitAllPolicy<Subscription>;
 
-// <<< CUSTOM
-// END CUSTOM

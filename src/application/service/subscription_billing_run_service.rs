@@ -32,5 +32,3 @@ pub type SubscriptionBillingRunService = GenericCrudService<
     SubscriptionBillingRunRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

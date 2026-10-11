@@ -16,9 +16,5 @@ pub type SubscriptionPlanLineValidator = EntityValidator<SubscriptionPlanLine>;
 pub fn subscription_plan_line_validator() -> SubscriptionPlanLineValidator {
     EntityValidator::new()
         .rule(OptionalNotBlank::new("description", |e: &SubscriptionPlanLine| e.description.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -19,9 +19,5 @@ pub fn subscription_plan_validator() -> SubscriptionPlanValidator {
         .rule(RequiredString::new("name", |e: &SubscriptionPlan| &e.name))
         .rule(OptionalNotBlank::new("description", |e: &SubscriptionPlan| e.description.as_deref()))
         .rule(RequiredString::new("currency", |e: &SubscriptionPlan| &e.currency))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

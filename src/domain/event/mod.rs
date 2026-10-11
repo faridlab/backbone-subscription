@@ -20,5 +20,3 @@ pub use subscription_plan_event_handlers::SubscriptionPlanEventHandler;
 pub use subscription_plan_line_events::{SubscriptionPlanLineEvent, SubscriptionPlanLineEventPublisher, NoopSubscriptionPlanLineEventPublisher};
 pub use subscription_plan_line_event_handlers::SubscriptionPlanLineEventHandler;
 
-// <<< CUSTOM
-// END CUSTOM

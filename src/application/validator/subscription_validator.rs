@@ -17,9 +17,5 @@ pub fn subscription_validator() -> SubscriptionValidator {
     EntityValidator::new()
         .rule(RequiredString::new("subscription_number", |e: &Subscription| &e.subscription_number))
         .rule(RequiredString::new("currency", |e: &Subscription| &e.currency))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

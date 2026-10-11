@@ -12,15 +12,11 @@ pub mod subscription_billing_run_service;
 pub mod subscription_plan_service;
 pub mod subscription_plan_line_service;
 
-// <<< CUSTOM
-// END CUSTOM
 
 pub use subscription_service::SubscriptionService;
 pub use subscription_billing_run_service::SubscriptionBillingRunService;
 pub use subscription_plan_service::SubscriptionPlanService;
 pub use subscription_plan_line_service::SubscriptionPlanLineService;
-// <<< CUSTOM
-// END CUSTOM
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

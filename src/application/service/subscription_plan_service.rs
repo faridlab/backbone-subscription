@@ -32,5 +32,3 @@ pub type SubscriptionPlanService = GenericCrudService<
     SubscriptionPlanRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM
