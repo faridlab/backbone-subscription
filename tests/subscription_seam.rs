@@ -134,10 +134,7 @@ async fn cadence_stages_invoice_due_and_relay_creates_billing_invoice() {
 
     let inv = billing_rec.create_sales_invoice(NewSalesInvoice {
         invoice_number: format!("INV-{}", &Uuid::new_v4().simple().to_string()[..8]),
-        // The event's company_id is the legacy tenancy twin (ADR-0029) — passed through for
-        // the pinned billing release's still-company-shaped input; billing keys no fence on
-        // it under its own strip.
-        company_id: due.company_id, branch_id: due.branch_id, customer_id: due.customer_id,
+        branch_id: due.branch_id, customer_id: due.customer_id,
         source_so_id: None, posting_date: due.posting_date, due_date: due.due_date,
         payment_term_id: None,
         currency: due.currency.clone(), receivable_account_id: due.receivable_account_id,
