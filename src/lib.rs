@@ -148,15 +148,15 @@ impl SubscriptionModuleBuilder {
 
         // Subscription service
         let subscription_repository = Arc::new(SubscriptionRepository::new(db_pool.clone()));
-        let subscription_service = Arc::new(SubscriptionService::with_repository(subscription_repository.clone()));
+        let subscription_service = Arc::new(SubscriptionService::with_repository(subscription_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionRowRules)));
 
         // SubscriptionBillingRun service
         let subscription_billing_run_repository = Arc::new(SubscriptionBillingRunRepository::new(db_pool.clone()));
-        let subscription_billing_run_service = Arc::new(SubscriptionBillingRunService::with_repository(subscription_billing_run_repository.clone()));
+        let subscription_billing_run_service = Arc::new(SubscriptionBillingRunService::with_repository(subscription_billing_run_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionBillingRunRowRules)));
 
         // SubscriptionPlan service
         let subscription_plan_repository = Arc::new(SubscriptionPlanRepository::new(db_pool.clone()));
-        let subscription_plan_service = Arc::new(SubscriptionPlanService::with_repository(subscription_plan_repository.clone()));
+        let subscription_plan_service = Arc::new(SubscriptionPlanService::with_repository(subscription_plan_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionPlanRowRules)));
 
         // SubscriptionPlanLine service
         let subscription_plan_line_repository = Arc::new(SubscriptionPlanLineRepository::new(db_pool.clone()));

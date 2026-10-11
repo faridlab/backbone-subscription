@@ -14,6 +14,7 @@ version: 2
 state_machines:
   - entity: SubscriptionPlan
     field: status
+    verbs: hand
     initial: active
     states: [active, archived]
     transitions:
@@ -21,6 +22,7 @@ state_machines:
 
   - entity: Subscription
     field: status
+    verbs: hand
     initial: active
     states: [trial, active, paused, past_due, cancelled, expired]
     transitions:
@@ -37,6 +39,7 @@ state_machines:
 
   - entity: SubscriptionBillingRun
     field: status
+    verbs: hand
     initial: pending
     states: [pending, invoiced, failed]
     transitions:
