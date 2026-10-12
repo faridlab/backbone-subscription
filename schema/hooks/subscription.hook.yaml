@@ -53,9 +53,11 @@ state_machines:
 rules:
   - id: R1
     name: period_dates_ordered
+    entity: Subscription
     when: writing
     assert: "current_period_start <= current_period_end and next_billing_date >= current_period_end"
     error_code: invalid_period_dates
+    justification: "Nothing refuses it: no service check, no database constraint, and invalid_period_dates is never produced. Generic subscription writes are not mounted in serpa, and the cadence keeps the dates ordered by construction (period_end is the day before next_billing_date), so no live path writes a disordered period today; a write path or a CHECK constraint must refuse it before this can be claimed."
 
 # -----------------------------------------------------------------------------
 # Domain events (emission is the service's responsibility; staged into the outbox).
