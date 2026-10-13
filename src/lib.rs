@@ -37,9 +37,6 @@ pub use application::service::SubscriptionBillingRunService;
 pub use application::service::SubscriptionPlanService;
 pub use application::service::SubscriptionPlanLineService;
 
-// Re-exports - Validation
-pub use application::validator::{ValidationError, ValidationResult};
-
 use std::sync::Arc;
 use axum::Router;
 use sqlx::PgPool;
@@ -160,7 +157,7 @@ impl SubscriptionModuleBuilder {
 
         // SubscriptionPlanLine service
         let subscription_plan_line_repository = Arc::new(SubscriptionPlanLineRepository::new(db_pool.clone()));
-        let subscription_plan_line_service = Arc::new(SubscriptionPlanLineService::with_repository(subscription_plan_line_repository.clone()));
+        let subscription_plan_line_service = Arc::new(SubscriptionPlanLineService::with_repository(subscription_plan_line_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionPlanLineRowRules)));
 
 
         Ok(SubscriptionModule {

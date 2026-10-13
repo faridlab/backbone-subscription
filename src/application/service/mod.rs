@@ -20,6 +20,7 @@ pub use subscription_plan_line_service::SubscriptionPlanLineService;
 pub use subscription_service::SubscriptionRowRules;
 pub use subscription_billing_run_service::SubscriptionBillingRunRowRules;
 pub use subscription_plan_service::SubscriptionPlanRowRules;
+pub use subscription_plan_line_service::SubscriptionPlanLineRowRules;
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

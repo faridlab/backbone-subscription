@@ -32,9 +32,10 @@ pub type SubscriptionService = GenericCrudService<
     SubscriptionRepository,
 >;
 
-/// The row rules the schema declares for Subscription, checked against the row a create or
-/// update would store. The generated build attaches it to [`SubscriptionService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for Subscription, checked against the row a create or update
+/// would store. The generated build attaches it to [`SubscriptionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct SubscriptionRowRules;
 
 #[async_trait::async_trait]
@@ -56,11 +57,32 @@ impl backbone_core::write_guard::WriteGuard<Subscription> for SubscriptionRowRul
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        // `subscription_number_required` (@required on Subscription.subscription_number)
+        if (create || (update && r::changed(old.as_ref(), row, &["subscription_number"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "subscription_number")), r::not(r::is_empty(r::trim(r::field(row, "subscription_number")))))) {
+            refuse.push(Violation::new("subscription_number", "required", "subscription_number is required"));
+        }
+        // `subscription_number_max_length` (@max(40) on Subscription.subscription_number)
+        if (create || (update && r::changed(old.as_ref(), row, &["subscription_number"]))) && !r::holds(&r::le(r::length(r::field(row, "subscription_number")), r::Val::Num(40.0_f64))) {
+            shadow.push(Violation::new("subscription_number", "max_length", "subscription_number must be at most 40 characters").with_param("max", 40_i64));
+        }
+        // `customer_id_required` (@required on Subscription.customer_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["customer_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "customer_id")), r::not(r::is_empty(r::trim(r::field(row, "customer_id")))))) {
+            refuse.push(Violation::new("customer_id", "required", "customer_id is required"));
+        }
+        // `plan_id_required` (@required on Subscription.plan_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["plan_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "plan_id")), r::not(r::is_empty(r::trim(r::field(row, "plan_id")))))) {
+            refuse.push(Violation::new("plan_id", "required", "plan_id is required"));
+        }
+        // `currency_max_length` (@max(3) on Subscription.currency)
+        if (create || (update && r::changed(old.as_ref(), row, &["currency"]))) && !r::holds(&r::le(r::length(r::field(row, "currency")), r::Val::Num(3.0_f64))) {
+            shadow.push(Violation::new("currency", "max_length", "currency must be at most 3 characters").with_param("max", 3_i64));
+        }
+        GuardOutcome { refuse, shadow }
     }
 }
 

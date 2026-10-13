@@ -32,9 +32,10 @@ pub type SubscriptionBillingRunService = GenericCrudService<
     SubscriptionBillingRunRepository,
 >;
 
-/// The row rules the schema declares for SubscriptionBillingRun, checked against the row a create or
-/// update would store. The generated build attaches it to [`SubscriptionBillingRunService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for SubscriptionBillingRun, checked against the row a create or update
+/// would store. The generated build attaches it to [`SubscriptionBillingRunService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct SubscriptionBillingRunRowRules;
 
 #[async_trait::async_trait]
@@ -56,11 +57,28 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionBillingRun> for Subscrip
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        // `subscription_id_required` (@required on SubscriptionBillingRun.subscription_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["subscription_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "subscription_id")), r::not(r::is_empty(r::trim(r::field(row, "subscription_id")))))) {
+            refuse.push(Violation::new("subscription_id", "required", "subscription_id is required"));
+        }
+        // `grand_total_non_negative` (@non_negative on SubscriptionBillingRun.grand_total)
+        if (create || (update && r::changed(old.as_ref(), row, &["grand_total"]))) && !r::holds(&r::ge(r::field(row, "grand_total"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("grand_total", "non_negative", "grand_total must not be negative"));
+        }
+        // `idempotency_key_required` (@required on SubscriptionBillingRun.idempotency_key)
+        if (create || (update && r::changed(old.as_ref(), row, &["idempotency_key"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "idempotency_key")), r::not(r::is_empty(r::trim(r::field(row, "idempotency_key")))))) {
+            refuse.push(Violation::new("idempotency_key", "required", "idempotency_key is required"));
+        }
+        // `idempotency_key_max_length` (@max(120) on SubscriptionBillingRun.idempotency_key)
+        if (create || (update && r::changed(old.as_ref(), row, &["idempotency_key"]))) && !r::holds(&r::le(r::length(r::field(row, "idempotency_key")), r::Val::Num(120.0_f64))) {
+            shadow.push(Violation::new("idempotency_key", "max_length", "idempotency_key must be at most 120 characters").with_param("max", 120_i64));
+        }
+        GuardOutcome { refuse, shadow }
     }
 }
 

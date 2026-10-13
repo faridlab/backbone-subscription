@@ -32,3 +32,53 @@ pub type SubscriptionPlanLineService = GenericCrudService<
     SubscriptionPlanLineRepository,
 >;
 
+/// The rules the schema declares for SubscriptionPlanLine, checked against the row a create or update
+/// would store. The generated build attaches it to [`SubscriptionPlanLineService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct SubscriptionPlanLineRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<SubscriptionPlanLine> for SubscriptionPlanLineRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, SubscriptionPlanLine>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `plan_id_required` (@required on SubscriptionPlanLine.plan_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["plan_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "plan_id")), r::not(r::is_empty(r::trim(r::field(row, "plan_id")))))) {
+            refuse.push(Violation::new("plan_id", "required", "plan_id is required"));
+        }
+        // `item_id_required` (@required on SubscriptionPlanLine.item_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["item_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "item_id")), r::not(r::is_empty(r::trim(r::field(row, "item_id")))))) {
+            refuse.push(Violation::new("item_id", "required", "item_id is required"));
+        }
+        // `account_id_required` (@required on SubscriptionPlanLine.account_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["account_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "account_id")), r::not(r::is_empty(r::trim(r::field(row, "account_id")))))) {
+            refuse.push(Violation::new("account_id", "required", "account_id is required"));
+        }
+        // `quantity_non_negative` (@non_negative on SubscriptionPlanLine.quantity)
+        if (create || (update && r::changed(old.as_ref(), row, &["quantity"]))) && !r::holds(&r::ge(r::field(row, "quantity"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("quantity", "non_negative", "quantity must not be negative"));
+        }
+        // `unit_price_non_negative` (@non_negative on SubscriptionPlanLine.unit_price)
+        if (create || (update && r::changed(old.as_ref(), row, &["unit_price"]))) && !r::holds(&r::ge(r::field(row, "unit_price"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("unit_price", "non_negative", "unit_price must not be negative"));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+
