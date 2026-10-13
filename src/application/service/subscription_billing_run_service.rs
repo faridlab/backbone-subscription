@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionBillingRun> for Subscrip
         }
         // `grand_total_non_negative` (@non_negative on SubscriptionBillingRun.grand_total)
         if (create || (update && r::changed(old.as_ref(), row, &["grand_total"]))) && !r::holds(&r::ge(r::field(row, "grand_total"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("grand_total", "non_negative", "grand_total must not be negative"));
+            refuse.push(Violation::new("grand_total", "non_negative", "grand_total must not be negative"));
         }
         // `idempotency_key_required` (@required on SubscriptionBillingRun.idempotency_key)
         if (create || (update && r::changed(old.as_ref(), row, &["idempotency_key"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "idempotency_key")), r::not(r::is_empty(r::trim(r::field(row, "idempotency_key")))))) {
@@ -76,7 +76,7 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionBillingRun> for Subscrip
         }
         // `idempotency_key_max_length` (@max(120) on SubscriptionBillingRun.idempotency_key)
         if (create || (update && r::changed(old.as_ref(), row, &["idempotency_key"]))) && !r::holds(&r::le(r::length(r::field(row, "idempotency_key")), r::Val::Num(120.0_f64))) {
-            shadow.push(Violation::new("idempotency_key", "max_length", "idempotency_key must be at most 120 characters").with_param("max", 120_i64));
+            refuse.push(Violation::new("idempotency_key", "max_length", "idempotency_key must be at most 120 characters").with_param("max", 120_i64));
         }
         GuardOutcome { refuse, shadow }
     }

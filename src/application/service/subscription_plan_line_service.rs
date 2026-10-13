@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionPlanLine> for Subscripti
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `plan_id_required` (@required on SubscriptionPlanLine.plan_id)
         if (create || (update && r::changed(old.as_ref(), row, &["plan_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "plan_id")), r::not(r::is_empty(r::trim(r::field(row, "plan_id")))))) {
@@ -72,11 +72,11 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionPlanLine> for Subscripti
         }
         // `quantity_non_negative` (@non_negative on SubscriptionPlanLine.quantity)
         if (create || (update && r::changed(old.as_ref(), row, &["quantity"]))) && !r::holds(&r::ge(r::field(row, "quantity"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("quantity", "non_negative", "quantity must not be negative"));
+            refuse.push(Violation::new("quantity", "non_negative", "quantity must not be negative"));
         }
         // `unit_price_non_negative` (@non_negative on SubscriptionPlanLine.unit_price)
         if (create || (update && r::changed(old.as_ref(), row, &["unit_price"]))) && !r::holds(&r::ge(r::field(row, "unit_price"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("unit_price", "non_negative", "unit_price must not be negative"));
+            refuse.push(Violation::new("unit_price", "non_negative", "unit_price must not be negative"));
         }
         GuardOutcome { refuse, shadow }
     }

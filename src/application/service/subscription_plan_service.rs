@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionPlan> for SubscriptionPl
         }
         // `plan_code_max_length` (@max(40) on SubscriptionPlan.plan_code)
         if (create || (update && r::changed(old.as_ref(), row, &["plan_code"]))) && !r::holds(&r::le(r::length(r::field(row, "plan_code")), r::Val::Num(40.0_f64))) {
-            shadow.push(Violation::new("plan_code", "max_length", "plan_code must be at most 40 characters").with_param("max", 40_i64));
+            refuse.push(Violation::new("plan_code", "max_length", "plan_code must be at most 40 characters").with_param("max", 40_i64));
         }
         // `name_required` (@required on SubscriptionPlan.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
@@ -76,15 +76,15 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionPlan> for SubscriptionPl
         }
         // `name_max_length` (@length(max=200) on SubscriptionPlan.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(200.0_f64))) {
-            shadow.push(Violation::new("name", "max_length", "name must be at most 200 characters").with_param("max", 200_i64));
+            refuse.push(Violation::new("name", "max_length", "name must be at most 200 characters").with_param("max", 200_i64));
         }
         // `billing_day_range` (@range(1, 31) on SubscriptionPlan.billing_day)
         if (create || (update && r::changed(old.as_ref(), row, &["billing_day"]))) && !r::holds(&r::and(r::ge(r::field(row, "billing_day"), r::Val::Num(1.0_f64)), r::le(r::field(row, "billing_day"), r::Val::Num(31.0_f64)))) {
-            shadow.push(Violation::new("billing_day", "range", "billing_day must be between 1 and 31").with_param("min", 1_i64).with_param("max", 31_i64));
+            refuse.push(Violation::new("billing_day", "range", "billing_day must be between 1 and 31").with_param("min", 1_i64).with_param("max", 31_i64));
         }
         // `currency_max_length` (@max(3) on SubscriptionPlan.currency)
         if (create || (update && r::changed(old.as_ref(), row, &["currency"]))) && !r::holds(&r::le(r::length(r::field(row, "currency")), r::Val::Num(3.0_f64))) {
-            shadow.push(Violation::new("currency", "max_length", "currency must be at most 3 characters").with_param("max", 3_i64));
+            refuse.push(Violation::new("currency", "max_length", "currency must be at most 3 characters").with_param("max", 3_i64));
         }
         // `receivable_account_id_required` (@required on SubscriptionPlan.receivable_account_id)
         if (create || (update && r::changed(old.as_ref(), row, &["receivable_account_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "receivable_account_id")), r::not(r::is_empty(r::trim(r::field(row, "receivable_account_id")))))) {
@@ -92,11 +92,11 @@ impl backbone_core::write_guard::WriteGuard<SubscriptionPlan> for SubscriptionPl
         }
         // `price_non_negative` (@non_negative on SubscriptionPlan.price)
         if (create || (update && r::changed(old.as_ref(), row, &["price"]))) && !r::holds(&r::ge(r::field(row, "price"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("price", "non_negative", "price must not be negative"));
+            refuse.push(Violation::new("price", "non_negative", "price must not be negative"));
         }
         // `trial_days_non_negative` (@non_negative on SubscriptionPlan.trial_days)
         if (create || (update && r::changed(old.as_ref(), row, &["trial_days"]))) && !r::holds(&r::ge(r::field(row, "trial_days"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("trial_days", "non_negative", "trial_days must not be negative"));
+            refuse.push(Violation::new("trial_days", "non_negative", "trial_days must not be negative"));
         }
         GuardOutcome { refuse, shadow }
     }

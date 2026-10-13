@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<Subscription> for SubscriptionRowRul
         }
         // `subscription_number_max_length` (@max(40) on Subscription.subscription_number)
         if (create || (update && r::changed(old.as_ref(), row, &["subscription_number"]))) && !r::holds(&r::le(r::length(r::field(row, "subscription_number")), r::Val::Num(40.0_f64))) {
-            shadow.push(Violation::new("subscription_number", "max_length", "subscription_number must be at most 40 characters").with_param("max", 40_i64));
+            refuse.push(Violation::new("subscription_number", "max_length", "subscription_number must be at most 40 characters").with_param("max", 40_i64));
         }
         // `customer_id_required` (@required on Subscription.customer_id)
         if (create || (update && r::changed(old.as_ref(), row, &["customer_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "customer_id")), r::not(r::is_empty(r::trim(r::field(row, "customer_id")))))) {
@@ -80,7 +80,7 @@ impl backbone_core::write_guard::WriteGuard<Subscription> for SubscriptionRowRul
         }
         // `currency_max_length` (@max(3) on Subscription.currency)
         if (create || (update && r::changed(old.as_ref(), row, &["currency"]))) && !r::holds(&r::le(r::length(r::field(row, "currency")), r::Val::Num(3.0_f64))) {
-            shadow.push(Violation::new("currency", "max_length", "currency must be at most 3 characters").with_param("max", 3_i64));
+            refuse.push(Violation::new("currency", "max_length", "currency must be at most 3 characters").with_param("max", 3_i64));
         }
         GuardOutcome { refuse, shadow }
     }
