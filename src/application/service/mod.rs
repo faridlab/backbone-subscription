@@ -22,5 +22,37 @@ pub use subscription_billing_run_service::SubscriptionBillingRunRowRules;
 pub use subscription_plan_service::SubscriptionPlanRowRules;
 pub use subscription_plan_line_service::SubscriptionPlanLineRowRules;
 
+/// A `SubscriptionService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_subscription_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::SubscriptionRepository>,
+) -> SubscriptionService {
+    SubscriptionService::with_repository(repository).with_guard(std::sync::Arc::new(SubscriptionRowRules))
+}
+
+/// A `SubscriptionBillingRunService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_subscription_billing_run_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::SubscriptionBillingRunRepository>,
+) -> SubscriptionBillingRunService {
+    SubscriptionBillingRunService::with_repository(repository).with_guard(std::sync::Arc::new(SubscriptionBillingRunRowRules))
+}
+
+/// A `SubscriptionPlanService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_subscription_plan_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::SubscriptionPlanRepository>,
+) -> SubscriptionPlanService {
+    SubscriptionPlanService::with_repository(repository).with_guard(std::sync::Arc::new(SubscriptionPlanRowRules))
+}
+
+/// A `SubscriptionPlanLineService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_subscription_plan_line_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::SubscriptionPlanLineRepository>,
+) -> SubscriptionPlanLineService {
+    SubscriptionPlanLineService::with_repository(repository).with_guard(std::sync::Arc::new(SubscriptionPlanLineRowRules))
+}
+
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

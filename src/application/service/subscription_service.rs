@@ -82,6 +82,10 @@ impl backbone_core::write_guard::WriteGuard<Subscription> for SubscriptionRowRul
         if (create || (update && r::changed(old.as_ref(), row, &["currency"]))) && !r::holds(&r::le(r::length(r::field(row, "currency")), r::Val::Num(3.0_f64))) {
             refuse.push(Violation::new("currency", "max_length", "currency must be at most 3 characters").with_param("max", 3_i64));
         }
+        // `period_dates_ordered` (subscription.hook.yaml:54)
+        if (create || update) && !r::holds(&r::and(r::le(r::field(row, "current_period_start"), r::field(row, "current_period_end")), r::ge(r::field(row, "next_billing_date"), r::field(row, "current_period_end")))) {
+            refuse.push(Violation::new("current_period_start", "invalid_period_dates", "breaks the rule `period_dates_ordered`: current_period_start <= current_period_end && next_billing_date >= current_period_end"));
+        }
         GuardOutcome { refuse, shadow }
     }
 }

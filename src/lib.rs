@@ -145,19 +145,19 @@ impl SubscriptionModuleBuilder {
 
         // Subscription service
         let subscription_repository = Arc::new(SubscriptionRepository::new(db_pool.clone()));
-        let subscription_service = Arc::new(SubscriptionService::with_repository(subscription_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionRowRules)));
+        let subscription_service = Arc::new(crate::application::service::build_subscription_service(subscription_repository.clone()));
 
         // SubscriptionBillingRun service
         let subscription_billing_run_repository = Arc::new(SubscriptionBillingRunRepository::new(db_pool.clone()));
-        let subscription_billing_run_service = Arc::new(SubscriptionBillingRunService::with_repository(subscription_billing_run_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionBillingRunRowRules)));
+        let subscription_billing_run_service = Arc::new(crate::application::service::build_subscription_billing_run_service(subscription_billing_run_repository.clone()));
 
         // SubscriptionPlan service
         let subscription_plan_repository = Arc::new(SubscriptionPlanRepository::new(db_pool.clone()));
-        let subscription_plan_service = Arc::new(SubscriptionPlanService::with_repository(subscription_plan_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionPlanRowRules)));
+        let subscription_plan_service = Arc::new(crate::application::service::build_subscription_plan_service(subscription_plan_repository.clone()));
 
         // SubscriptionPlanLine service
         let subscription_plan_line_repository = Arc::new(SubscriptionPlanLineRepository::new(db_pool.clone()));
-        let subscription_plan_line_service = Arc::new(SubscriptionPlanLineService::with_repository(subscription_plan_line_repository.clone()).with_guard(Arc::new(crate::application::service::SubscriptionPlanLineRowRules)));
+        let subscription_plan_line_service = Arc::new(crate::application::service::build_subscription_plan_line_service(subscription_plan_line_repository.clone()));
 
 
         Ok(SubscriptionModule {
