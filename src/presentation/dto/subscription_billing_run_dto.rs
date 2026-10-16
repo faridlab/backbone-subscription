@@ -44,7 +44,6 @@ pub struct CreateSubscriptionBillingRunDto {
     pub due_date: NaiveDate,
     #[serde(alias = "grand_total")]
     pub grand_total: Decimal,
-    pub status: BillingRunStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "invoice_id")]
     pub invoice_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
@@ -269,7 +268,7 @@ impl From<CreateSubscriptionBillingRunDto> for SubscriptionBillingRun {
             period_end: dto.period_end,
             due_date: dto.due_date,
             grand_total: dto.grand_total,
-            status: dto.status,
+            status: BillingRunStatus::Pending,
             invoice_id: dto.invoice_id,
             idempotency_key: dto.idempotency_key,
             attempted_at: dto.attempted_at,

@@ -40,7 +40,6 @@ pub struct CreateSubscriptionDto {
     pub plan_id: Uuid,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "branch_id")]
     pub branch_id: Option<Uuid>,
-    pub status: SubscriptionStatus,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01"))]
     #[serde(alias = "started_at")]
     pub started_at: NaiveDate,
@@ -301,7 +300,7 @@ impl From<CreateSubscriptionDto> for Subscription {
             customer_id: dto.customer_id,
             plan_id: dto.plan_id,
             branch_id: dto.branch_id,
-            status: dto.status,
+            status: SubscriptionStatus::Active,
             started_at: dto.started_at,
             current_period_start: dto.current_period_start,
             current_period_end: dto.current_period_end,

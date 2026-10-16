@@ -51,7 +51,6 @@ pub struct CreateSubscriptionPlanDto {
     pub price: Decimal,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "trial_days")]
     pub trial_days: Option<i32>,
-    pub status: SubscriptionPlanStatus,
 }
 
 // =============================================================================
@@ -276,7 +275,7 @@ impl From<CreateSubscriptionPlanDto> for SubscriptionPlan {
             receivable_account_id: dto.receivable_account_id,
             price: dto.price,
             trial_days: dto.trial_days,
-            status: dto.status,
+            status: SubscriptionPlanStatus::Active,
             metadata: AuditMetadata::default(),
         }
     }
