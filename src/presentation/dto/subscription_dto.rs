@@ -53,11 +53,16 @@ pub struct CreateSubscriptionDto {
     #[serde(alias = "next_billing_date")]
     pub next_billing_date: NaiveDate,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
+    #[serde(default = "default_create_subscription_currency")]
     pub currency: String,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "cancelled_at")]
     pub cancelled_at: Option<NaiveDate>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "ended_at")]
     pub ended_at: Option<NaiveDate>,
+}
+
+fn default_create_subscription_currency() -> String {
+    "IDR".to_string()
 }
 
 // =============================================================================
@@ -125,8 +130,8 @@ pub struct PatchSubscriptionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "plan_id")]
     pub plan_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "branch_id")]
-    pub branch_id: Option<Uuid>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "branch_id")]
+    pub branch_id: Option<Option<Uuid>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<SubscriptionStatus>,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01"))]
@@ -144,10 +149,10 @@ pub struct PatchSubscriptionDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub currency: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "cancelled_at")]
-    pub cancelled_at: Option<NaiveDate>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "ended_at")]
-    pub ended_at: Option<NaiveDate>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "cancelled_at")]
+    pub cancelled_at: Option<Option<NaiveDate>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "ended_at")]
+    pub ended_at: Option<Option<NaiveDate>>,
 }
 
 impl PatchSubscriptionDto {
@@ -357,12 +362,4 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionDto> for Subscription {
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to Subscription here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

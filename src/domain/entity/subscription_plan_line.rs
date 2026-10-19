@@ -187,6 +187,12 @@ impl super::Entity for SubscriptionPlanLine {
 }
 
 impl backbone_core::PersistentEntity for SubscriptionPlanLine {
+    fn references() -> &'static [backbone_core::Reference] {
+        const REFERENCES: &[backbone_core::Reference] = &[
+            backbone_core::Reference::new("plan_id", "subscription.subscription_plans", "id"),
+        ];
+        REFERENCES
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }

@@ -117,13 +117,13 @@ pub struct PatchSubscriptionBillingRunDto {
     pub grand_total: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<BillingRunStatus>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "invoice_id")]
-    pub invoice_id: Option<Uuid>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "invoice_id")]
+    pub invoice_id: Option<Option<Uuid>>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "idempotency_key")]
     pub idempotency_key: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "attempted_at")]
-    pub attempted_at: Option<DateTime<Utc>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "attempted_at")]
+    pub attempted_at: Option<Option<DateTime<Utc>>>,
 }
 
 impl PatchSubscriptionBillingRunDto {
@@ -315,12 +315,4 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionBillingRunDto> for Subscrip
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to SubscriptionBillingRun here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

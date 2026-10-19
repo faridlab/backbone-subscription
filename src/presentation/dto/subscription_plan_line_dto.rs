@@ -94,8 +94,8 @@ pub struct PatchSubscriptionPlanLineDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "account_id")]
     pub account_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option")]
+    pub description: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quantity: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "unit_price")]
@@ -274,12 +274,4 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionPlanLineDto> for Subscripti
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to SubscriptionPlanLine here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

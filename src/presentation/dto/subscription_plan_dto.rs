@@ -38,12 +38,13 @@ pub struct CreateSubscriptionPlanDto {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(alias = "billing_cycle")]
+    #[serde(default = "default_create_subscription_plan_billing_cycle", alias = "billing_cycle")]
     pub billing_cycle: BillingCycle,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
-    #[serde(alias = "billing_day")]
+    #[serde(default = "default_create_subscription_plan_billing_day", alias = "billing_day")]
     pub billing_day: i32,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
+    #[serde(default = "default_create_subscription_plan_currency")]
     pub currency: String,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "receivable_account_id")]
@@ -51,6 +52,18 @@ pub struct CreateSubscriptionPlanDto {
     pub price: Decimal,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "trial_days")]
     pub trial_days: Option<i32>,
+}
+
+fn default_create_subscription_plan_billing_cycle() -> BillingCycle {
+    BillingCycle::Monthly
+}
+
+fn default_create_subscription_plan_billing_day() -> i32 {
+    1
+}
+
+fn default_create_subscription_plan_currency() -> String {
+    "IDR".to_string()
 }
 
 // =============================================================================
@@ -106,8 +119,8 @@ pub struct PatchSubscriptionPlanDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option")]
+    pub description: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "billing_cycle")]
     pub billing_cycle: Option<BillingCycle>,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
@@ -121,8 +134,8 @@ pub struct PatchSubscriptionPlanDto {
     pub receivable_account_id: Option<Uuid>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub price: Option<Decimal>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "trial_days")]
-    pub trial_days: Option<i32>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "trial_days")]
+    pub trial_days: Option<Option<i32>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<SubscriptionPlanStatus>,
 }
@@ -321,12 +334,4 @@ impl backbone_core::ApplyUpdateDto<UpdateSubscriptionPlanDto> for SubscriptionPl
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to SubscriptionPlan here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

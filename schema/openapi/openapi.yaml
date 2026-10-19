@@ -1565,13 +1565,10 @@ components:
         - subscription_number
         - customer_id
         - plan_id
-        - status
         - started_at
         - current_period_start
         - current_period_end
         - next_billing_date
-        - currency
-        - metadata
       properties:
         subscription_number:
           type: string
@@ -1586,8 +1583,6 @@ components:
           nullable: true
           type: string
           format: uuid
-        status:
-          type: string
         started_at:
           type: string
           format: date
@@ -1611,8 +1606,6 @@ components:
           nullable: true
           type: string
           format: date
-        metadata:
-          type: object
 
     UpdateSubscriptionRequest:
       type: object
@@ -1626,7 +1619,6 @@ components:
         - current_period_end
         - next_billing_date
         - currency
-        - metadata
       properties:
         subscription_number:
           type: string
@@ -1666,8 +1658,6 @@ components:
           nullable: true
           type: string
           format: date
-        metadata:
-          type: object
 
     PatchSubscriptionRequest:
       type: object
@@ -1710,8 +1700,6 @@ components:
           nullable: true
           type: string
           format: date
-        metadata:
-          type: object
 
     SubscriptionList:
       type: object
@@ -1790,9 +1778,7 @@ components:
         - period_end
         - due_date
         - grand_total
-        - status
         - idempotency_key
-        - metadata
       properties:
         subscription_id:
           type: string
@@ -1808,8 +1794,6 @@ components:
           format: date
         grand_total:
           type: string
-        status:
-          type: string
         invoice_id:
           nullable: true
           type: string
@@ -1821,8 +1805,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     UpdateSubscriptionBillingRunRequest:
       type: object
@@ -1834,7 +1816,6 @@ components:
         - grand_total
         - status
         - idempotency_key
-        - metadata
       properties:
         subscription_id:
           type: string
@@ -1863,8 +1844,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     PatchSubscriptionBillingRunRequest:
       type: object
@@ -1896,8 +1875,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     SubscriptionBillingRunList:
       type: object
@@ -1974,13 +1951,8 @@ components:
       required:
         - plan_code
         - name
-        - billing_cycle
-        - billing_day
-        - currency
         - receivable_account_id
         - price
-        - status
-        - metadata
       properties:
         plan_code:
           type: string
@@ -2007,10 +1979,6 @@ components:
           nullable: true
           type: integer
           format: int32
-        status:
-          type: string
-        metadata:
-          type: object
 
     UpdateSubscriptionPlanRequest:
       type: object
@@ -2023,7 +1991,6 @@ components:
         - receivable_account_id
         - price
         - status
-        - metadata
       properties:
         plan_code:
           type: string
@@ -2052,8 +2019,6 @@ components:
           format: int32
         status:
           type: string
-        metadata:
-          type: object
 
     PatchSubscriptionPlanRequest:
       type: object
@@ -2085,8 +2050,6 @@ components:
           format: int32
         status:
           type: string
-        metadata:
-          type: object
 
     SubscriptionPlanList:
       type: object
@@ -2152,7 +2115,6 @@ components:
         - account_id
         - quantity
         - unit_price
-        - metadata
       properties:
         plan_id:
           type: string
@@ -2170,8 +2132,6 @@ components:
           type: string
         unit_price:
           type: string
-        metadata:
-          type: object
 
     UpdateSubscriptionPlanLineRequest:
       type: object
@@ -2181,7 +2141,6 @@ components:
         - account_id
         - quantity
         - unit_price
-        - metadata
       properties:
         plan_id:
           type: string
@@ -2199,8 +2158,6 @@ components:
           type: string
         unit_price:
           type: string
-        metadata:
-          type: object
 
     PatchSubscriptionPlanLineRequest:
       type: object
@@ -2221,8 +2178,6 @@ components:
           type: string
         unit_price:
           type: string
-        metadata:
-          type: object
 
     SubscriptionPlanLineList:
       type: object

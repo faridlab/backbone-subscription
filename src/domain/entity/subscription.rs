@@ -235,6 +235,15 @@ impl super::Entity for Subscription {
 }
 
 impl backbone_core::PersistentEntity for Subscription {
+    fn state_fields() -> &'static [&'static str] {
+        &["status"]
+    }
+    fn references() -> &'static [backbone_core::Reference] {
+        const REFERENCES: &[backbone_core::Reference] = &[
+            backbone_core::Reference::new("plan_id", "subscription.subscription_plans", "id"),
+        ];
+        REFERENCES
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }

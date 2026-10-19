@@ -81,6 +81,13 @@ impl axum::response::IntoResponse for SubscriptionError {
 // Route Configuration
 // =============================================================================
 
+/// The permissions this entity's generic routes require: `subscription:<action>` for `read`, `create`,
+/// `update`, `delete`, `restore` and `purge`, with any rename the schema's `requires:` declares.
+pub fn subscription_permissions() -> backbone_core::http::CrudPermissions {
+    backbone_core::http::CrudPermissions::new("subscription")
+        .in_module("subscription")
+}
+
 /// Create Axum router with all 16 Backbone endpoints for Subscription.
 ///
 /// # Routes
@@ -110,21 +117,23 @@ impl axum::response::IntoResponse for SubscriptionError {
 /// let router = create_subscription_routes(service);
 /// ```
 pub fn create_subscription_routes(service: Arc<SubscriptionService>) -> Router {
-    BackboneCrudHandler::<SubscriptionService, Subscription, CreateSubscriptionDto, UpdateSubscriptionDto, SubscriptionResponseDto>::routes(
+    BackboneCrudHandler::<SubscriptionService, Subscription, CreateSubscriptionDto, UpdateSubscriptionDto, SubscriptionResponseDto>::routes_guarded(
         service,
         "/subscriptions",
+        subscription_permissions(),
     )
 }
 
 /// Create Axum router with only the read (GET) endpoints for Subscription.
 ///
-/// Safe for public, unauthenticated exposure (e.g., reference data).
+/// Each route requires the entity's `read` permission, so it needs an authenticated caller.
 /// Mutations must be served separately via `create_subscription_write_routes`,
 /// typically wrapped in an auth middleware layer.
 pub fn create_subscription_read_routes(service: Arc<SubscriptionService>) -> Router {
-    BackboneCrudHandler::<SubscriptionService, Subscription, CreateSubscriptionDto, UpdateSubscriptionDto, SubscriptionResponseDto>::read_routes(
+    BackboneCrudHandler::<SubscriptionService, Subscription, CreateSubscriptionDto, UpdateSubscriptionDto, SubscriptionResponseDto>::read_routes_guarded(
         service,
         "/subscriptions",
+        subscription_permissions(),
     )
 }
 
@@ -140,9 +149,10 @@ pub fn create_subscription_read_routes(service: Arc<SubscriptionService>) -> Rou
 /// service (e.g. a command router over its domain engine), serve THAT instead
 /// for any mutation that must respect domain rules.
 pub fn create_subscription_write_routes(service: Arc<SubscriptionService>) -> Router {
-    BackboneCrudHandler::<SubscriptionService, Subscription, CreateSubscriptionDto, UpdateSubscriptionDto, SubscriptionResponseDto>::write_routes(
+    BackboneCrudHandler::<SubscriptionService, Subscription, CreateSubscriptionDto, UpdateSubscriptionDto, SubscriptionResponseDto>::write_routes_guarded(
         service,
         "/subscriptions",
+        subscription_permissions(),
     )
 }
 

@@ -221,6 +221,9 @@ impl super::Entity for SubscriptionPlan {
 }
 
 impl backbone_core::PersistentEntity for SubscriptionPlan {
+    fn state_fields() -> &'static [&'static str] {
+        &["status"]
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }
